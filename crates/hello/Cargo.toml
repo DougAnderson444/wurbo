@@ -1,0 +1,33 @@
+[package]
+name = "hello"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = { version = "0.6.0", default_features = false }
+render = "0.3.1"                                              # for html! macro, see https://github.com/render-rs/render.rs
+
+[package.metadata.component]
+package = "component:cargo-comp"
+
+[package.metadata.component.target]
+path = "wit"
+
+[package.metadata.component.dependencies]
+
+# The profile below isn't needed here because it's in the Workspace root
+# but, if you don't have a workspace add this in to make your builds smaller
+# [profile.release]
+# opt-level = "z"          # Optimize for size.
+# lto = true               # Enable Link Time Optimization
+# codegen-units = 1        # allow for maximum size reduction optimizations
+# strip = true             # Automatically strip symbols from the binary.
+# panic = 'abort'          # Abort on panic
+# debug = false
+# debug-assertions = false
+# overflow-checks = false
+# incremental = false
+# rpath = false
