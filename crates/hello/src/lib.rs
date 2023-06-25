@@ -1,5 +1,13 @@
 #![allow(unused_braces)] // macro triggers this warning, disable it
 
+mod button;
+mod count;
+mod input;
+
+use button::Button;
+use count::count_vowels;
+use input::Input;
+
 use render::{
     // A macro to create components
     component,
@@ -14,16 +22,16 @@ use render::{
 // This can be any layout we want
 #[component]
 fn Page<'a, Children: Render>(title: &'a str, children: Children) {
-    let world = "planet";
+    let world = "planets";
     rsx! {
-      <>
-        <h1 hello={world}>
+      <div class={"p-4"}>
+        <h1 hello={world} class={"text-red-600 text-2xl font-bold"}>
             {title}
         </h1>
         <div>
             {children}
         </div>
-      </>
+      </div>
     }
 }
 
@@ -35,12 +43,26 @@ impl bindings::Example for Component {
         // For IMPORTS: bindings         ::package::namespace::importname...
         // For EXPORTS: bindings::exports::package::namespace::exportname...
         // bindings::component::cargo_comp::imports::prnt("Hello, World!");
+        let count = count_vowels(&name);
 
         html! {
           <Page title={"Home"}>
-            {format!("Hello, {name}!")}
+            {format!("Hello, {name}!")}<br/>
+            {format!("{name} has {count} vowels.")}<br/>
+            <Input title={&name} />
+            <Button title={"A title"}>
+                {"Click Me!"}
+            </Button>
           </Page>
         }
+    }
+
+    fn listen() {
+        // call improts:: addeventlistener
+        let selector = "button";
+        let ty = "click";
+        let val = "New Value";
+        bindings::component::cargo_comp::imports::addeventlistener(selector, ty, val);
     }
 }
 
