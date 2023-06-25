@@ -1,9 +1,12 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { browser } from '$app/environment';
 
 	// @ts-ignore
 	// Import wasm wasm component bytes as a url
-	import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
+	// Can import either wasi (if you have sys dependencies such as getrandom) or unknown-unknown (if you don't)
+	// import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
+	import wasmURL from '../../crates/target/wasm32-unknown-unknown/release/hello.wasm?url';
 
 	// get imports as a string
 	import importables from './importables.js?raw';
@@ -16,8 +19,15 @@
 	 * @type {string}
 	 */
 	let code = 'Standby, generating your bundle...';
+	/**
+	 * @type {Node}
+	 */
+	let parentDiv;
 
 	onMount(async () => {
+		// Set up a broadcast channel to listen for updates from the Blob URLs
+		const bc = new BroadcastChannel('listener_updates');
+
 		const { load } = await import('rollup-plugin-wit-component');
 		let wasmComponentBytesToESModule = await load();
 
@@ -36,16 +46,21 @@
 		let mod = await wasmComponentBytesToESModule({ wasmBytes, imprt: imports });
 
 		// @ts-ignore
-		console.log({ mod });
 		whatSayYou = mod.render('World');
-		console.log({ whatSayYou });
+		window.render = mod.render; // expose render function to blob URLs
+		await tick(); // wait for the DOM to be updated with the new Elements
+
+		// Listen for messages from the Blob URLs created in wasmComponentBytesToESModule
+		bc.onmessage = (event) => {
+			whatSayYou = event.data;
+		};
+
+		mod.listen(); // listen for events to update the mod state
 	});
 </script>
 
-<svelte:head>
-	<title>Rollup Plugin WIT Demo</title>
-</svelte:head>
-
-{#if whatSayYou}
-	{@html whatSayYou}
-{/if}
+<div bind:this={parentDiv}>
+	{#if whatSayYou}
+		{@html whatSayYou}
+	{/if}
+</div>

@@ -2,6 +2,10 @@
 
 [WIP] Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Components](https://github.com/WebAssembly/component-model). Kind of like [Elm](https://guide.elm-lang.org/architecture/) too? Render HTML from wasm ui components. Inject reactivity perhaps? Anything goes.
 
+## Interactivity
+
+DOM RPC?
+
 ## Developing
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
