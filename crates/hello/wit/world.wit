@@ -1,8 +1,15 @@
 package component:cargo-comp
 
 interface imports {
+
+  record listen-details {
+    selector: string,
+    ty: string,
+    value: string
+  }
+
   prnt: func(msg: string)
-  addeventlistener: func(selector: string, ty: string, value: string)
+  addeventlistener: func(details: listen-details)
 }
 
 /// An example world for the component to target.
