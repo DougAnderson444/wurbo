@@ -7,11 +7,11 @@ export const cargoCompImports = {
 	 * @param {function} handler - function to run when event is triggered
 	 */
 	addeventlistener({ selector, ty, value }) {
-		console.log('from importables.js: ', { selector, ty, value });
 		const bc = new BroadcastChannel('listener_updates');
 		let elem = document.querySelector(selector);
 		document.querySelector(selector).addEventListener(ty, (e) => {
-			console.log(ty, 'event triggered:', e);
+			// Because this cod eis in a blob:URL, we can't access the window object
+			// directly. Instead, we post a message to the parent window
 			bc.postMessage(window.render(e.target.value));
 		});
 	}
