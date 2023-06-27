@@ -23,12 +23,16 @@
 	 * @type {Node}
 	 */
 	let parentDiv;
+	/**
+	 * @type {{ render: (arg0: string) => string | null; listen: () => void; }}
+	 */
 	let mod;
 
 	onMount(async () => {
 		// Set up a broadcast channel to listen for updates from the Blob URLs
 		const bc = new BroadcastChannel('listener_updates');
 
+		// @ts-ignore
 		const { load } = await import('rollup-plugin-wit-component');
 		let wasmComponentBytesToESModule = await load();
 
@@ -48,12 +52,12 @@
 
 		// @ts-ignore
 		whatSayYou = mod.render('World');
+		// @ts-ignore
 		window.render = mod.render; // expose render function to blob URLs
 		// await tick(); // wait for the DOM to be updated with the new Elements
 
 		// Listen for messages from the Blob URLs created in wasmComponentBytesToESModule
 		bc.onmessage = (event) => {
-			console.log('message received', event.data);
 			// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
 			let id =
 				new DOMParser().parseFromString(event.data || '', 'text/html')?.body?.firstElementChild
