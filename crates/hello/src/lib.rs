@@ -1,12 +1,19 @@
+//! # Wurbo
+//! A Rust library for creating web components with JSX-like syntax.
+//!
 #![allow(unused_braces)] // macro triggers this warning, disable it
 
-mod button;
-mod count;
+mod components;
 mod input;
+mod output;
 
-use button::Button;
-use count::count_vowels;
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::sync::RwLock;
+
+use components::page::Page;
 use input::Input;
+use output::Output;
 
 use render::{
     // A macro to create components
@@ -19,19 +26,28 @@ use render::{
     Render,
 };
 
-// This can be any layout we want
-#[component]
-fn Page<'a, Children: Render>(title: &'a str, children: Children) {
-    let world = "planets";
-    rsx! {
-      <div class={"p-4"}>
-        <h1 hello={world} class={"text-red-600 text-2xl font-bold"}>
-            {title}
-        </h1>
-        <div>
-            {children}
-        </div>
-      </div>
+///Maps the #elementId to the event type
+type ListenerMap = HashMap<String, &'static str>;
+
+// We cannot have &self in the Component struct,
+// so we use static variables to store the state between functions
+// See https://crates.io/crates/lazy_static
+lazy_static::lazy_static! {
+  // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
+  static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+  // count
+  static ref COUNT: RwLock<u32> = RwLock::new(0);
+  // is_initialized
+  static ref IS_INITIALIZED: RwLock<bool> = RwLock::new(false);
+}
+
+pub struct Updater;
+
+impl Updater {
+    /// Insert the element id and event type into the LISTENERS_MAP
+    pub fn update(elem_id: String, ty: &'static str) {
+        let mut listeners = LISTENERS_MAP.lock().unwrap();
+        listeners.insert(elem_id, ty);
     }
 }
 
@@ -43,26 +59,43 @@ impl bindings::Example for Component {
         // For IMPORTS: bindings         ::package::namespace::importname...
         // For EXPORTS: bindings::exports::package::namespace::exportname...
         // bindings::component::cargo_comp::imports::prnt("Hello, World!");
-        let count = count_vowels(&name);
+        let init = *IS_INITIALIZED.read().unwrap();
+        let name = &name;
 
-        html! {
-          <Page title={"Home"}>
-            {format!("Hello, {name}!")}<br/>
-            {format!("{name} has {count} vowels.")}<br/>
-            <Input title={&name} />
-            <Button title={"A title"}>
-                {"Click Me!"}
-            </Button>
-          </Page>
+        bindings::component::cargo_comp::imports::prnt(&format!("is_initialized? {init}"));
+
+        // update state with given input and retun only that fragment
+        if !(init) {
+            let mut set_init = IS_INITIALIZED.write().unwrap();
+            *set_init = true;
+
+            // Render and return all HTML
+            html! {
+              <Page title={"Home"}>
+                <Input name />
+                <Output name />
+              </Page>
+            }
+        } else {
+            // Render and return only the output section of HTML
+            html! {
+              <Output name />
+            }
         }
     }
 
     fn listen() {
-        // call improts:: addeventlistener
-        let selector = "button";
-        let ty = "click";
-        let val = "New Value";
-        bindings::component::cargo_comp::imports::addeventlistener(selector, ty, val);
+        // iterate through LISTENERS_MAP, add each using addeventlistener
+        let listeners = LISTENERS_MAP.lock().unwrap();
+        for (selector, ty) in listeners.iter() {
+            let deets = bindings::component::cargo_comp::imports::ListenDetails {
+                selector,
+                ty,
+                value: "TODO", // TODO: State vs Updates/Changes
+            };
+
+            bindings::component::cargo_comp::imports::addeventlistener(deets);
+        }
     }
 }
 
