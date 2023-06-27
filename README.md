@@ -1,10 +1,12 @@
 # Wurbo
 
-[WIP] Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Components](https://github.com/WebAssembly/component-model). Kind of like [Elm](https://guide.elm-lang.org/architecture/) too? Render HTML from wasm ui components. Inject reactivity perhaps? Anything goes.
+Proof of concept web framework using wasm components. All input and UI generation is done in Wasm, so there cannot be "call home" vulnerabilities over your data inputs. This means you can use guest Apps (wasm components) in a trustless fashion in your host app.
+
+Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Components](https://github.com/WebAssembly/component-model). Kind of like [Elm](https://guide.elm-lang.org/architecture/) too? Render HTML from wasm ui components. Inject reactivity perhaps? Anything goes.
 
 ## Example
 
-- Example Guest component is [`crates/hello`](./crates/hello/lib.rs)
+- Example Guest component is [`crates/hello`](./crates/hello/src/lib.rs)
 - Example Host app is [`src/routes/+page.svelte`](./src/routes/+page.svelte)
 
 ## Demo
