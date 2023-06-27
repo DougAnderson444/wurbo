@@ -6,7 +6,7 @@
 	// Import wasm wasm component bytes as a url
 	// Can import either wasi (if you have sys dependencies such as getrandom) or unknown-unknown (if you don't)
 	// import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
-	import wasmURL from '../../crates/target/wasm32-unknown-unknown/release/hello.wasm?url';
+	import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
 
 	// get imports as a string
 	import importables from './importables.js?raw';
@@ -53,6 +53,22 @@
 
 		// Listen for messages from the Blob URLs created in wasmComponentBytesToESModule
 		bc.onmessage = (event) => {
+			console.log('message received', event.data);
+			// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
+			let id =
+				new DOMParser().parseFromString(event.data || '', 'text/html')?.body?.firstElementChild
+					?.id || null;
+			// if the id is not null, then we can update the html with the new string
+			if (id) {
+				// @ts-ignore
+				let chosen = document.getElementById(id);
+				if (chosen) {
+					// @ts-ignore
+					chosen.outerHTML = event.data;
+					return;
+				}
+			}
+			// else, replace all the html with the new string
 			whatSayYou = event.data;
 		};
 	});
