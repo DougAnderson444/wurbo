@@ -1,18 +1,25 @@
 use super::*;
 
 #[component]
-pub fn Input<'a>(name: &'a str) {
-    let elem = "another_Rando_ID";
+pub fn Input<'a>(name: &'a str, id: &'a str) {
+    // Type of event listener to listen for
     let ty = "keyup";
 
-    Updater::update(format!("#{elem}"), ty);
+    // Add this CSS selector to the list of selectors that will add event listeners
+    Updater::update(format!("#{id}"), ty);
 
     rsx! {
-        <input id={elem}
-        on_input={name}
-        class={"rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"}
-        placeholder={"Search for anything..."}
-        value={name}
-        />
+        <div>
+            <div class={"italic font-semibold"}>
+                {"The data you enter can't be seen by anyone else, since it's in a WebAssembly sandbox. =)"}
+            </div>
+            <input id
+            class={"rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"}
+            placeholder={"Search for anything..."}
+            />
+            <div class={"italic font-semibold"}>
+               {"But it can still calculate how many vowels are in your words for you!"}
+            </div>
+        </div>
     }
 }

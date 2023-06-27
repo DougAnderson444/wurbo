@@ -6,9 +6,11 @@
 mod components;
 mod input;
 mod output;
+mod utils;
 
 use std::collections::HashMap;
 use std::sync::Mutex;
+use std::sync::OnceLock;
 use std::sync::RwLock;
 
 use components::page::Page;
@@ -41,6 +43,8 @@ lazy_static::lazy_static! {
   static ref IS_INITIALIZED: RwLock<bool> = RwLock::new(false);
 }
 
+static OUTPUT_ID: OnceLock<String> = OnceLock::new();
+
 pub struct Updater;
 
 impl Updater {
@@ -56,30 +60,26 @@ struct Component;
 impl bindings::Example for Component {
     /// Say hello!
     fn render(name: String) -> String {
-        // For IMPORTS: bindings         ::package::namespace::importname...
-        // For EXPORTS: bindings::exports::package::namespace::exportname...
-        // bindings::component::cargo_comp::imports::prnt("Hello, World!");
-        let init = *IS_INITIALIZED.read().unwrap();
         let name = &name;
 
-        bindings::component::cargo_comp::imports::prnt(&format!("is_initialized? {init}"));
+        // If you want to print in the console:
+        // bindings::component::cargo_comp::imports::prnt(&format!("OUTPUT_ID? {OUTPUT_ID.get().unwrap()}"));
 
-        // update state with given input and retun only that fragment
-        if !(init) {
-            let mut set_init = IS_INITIALIZED.write().unwrap();
-            *set_init = true;
+        if OUTPUT_ID.get().is_none() {
+            #[allow(clippy::redundant_closure)]
+            let id: &String = OUTPUT_ID.get_or_init(|| utils::rand_id());
 
             // Render and return all HTML
             html! {
-              <Page title={"Home"}>
-                <Input name />
-                <Output name />
+              <Page title={"CAN'T BE EVIL"}>
+                <Input name id={&utils::rand_id()} />
+                <Output name id />
               </Page>
             }
         } else {
             // Render and return only the output section of HTML
             html! {
-              <Output name />
+              <Output name id={OUTPUT_ID.get().unwrap()} />
             }
         }
     }
