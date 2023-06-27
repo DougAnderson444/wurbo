@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 wit-bindgen = { version = "0.6.0", default_features = false }
 render = "0.3.1"                                              # for html! macro, see https://github.com/render-rs/render.rs
+lazy_static = "1.4.0"
 
 [package.metadata.component]
 package = "component:cargo-comp"
