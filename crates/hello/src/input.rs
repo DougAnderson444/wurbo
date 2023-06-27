@@ -6,7 +6,7 @@ pub fn Input<'a>(name: &'a str, id: &'a str) {
     let ty = "keyup";
 
     // Add this CSS selector to the list of selectors that will add event listeners
-    Updater::update(format!("#{id}"), ty);
+    Interactive::activate(format!("#{id}"), ty);
 
     rsx! {
         <div>
@@ -14,6 +14,7 @@ pub fn Input<'a>(name: &'a str, id: &'a str) {
                 {"The data you enter can't be seen by anyone else, since it's in a WebAssembly sandbox. =)"}
             </div>
             <input id
+            value={name}
             class={"rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"}
             placeholder={"Search for anything..."}
             />

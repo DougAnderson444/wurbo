@@ -45,11 +45,18 @@ lazy_static::lazy_static! {
 
 static OUTPUT_ID: OnceLock<String> = OnceLock::new();
 
-pub struct Updater;
+pub struct Interactive;
 
-impl Updater {
+impl Interactive {
     /// Insert the element id and event type into the LISTENERS_MAP
-    pub fn update(elem_id: String, ty: &'static str) {
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let my_CSS_selector = "#some_selector";
+    /// Interactive::activate(format!("#{my_CSS_selector}"), "keyup");
+    /// ```
+    pub fn activate(elem_id: String, ty: &'static str) {
         let mut listeners = LISTENERS_MAP.lock().unwrap();
         listeners.insert(elem_id, ty);
     }
