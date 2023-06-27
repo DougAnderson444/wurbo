@@ -1,6 +1,6 @@
 export const cargoCompImports = {
 	prnt(string) {
-		console.log('from importables.js: ', string);
+		console.log(string);
 	},
 	/**
 	 * @param {string} ty - type of event to listen for
