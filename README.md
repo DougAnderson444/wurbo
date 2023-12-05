@@ -10,7 +10,7 @@ Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Componen
 
 ## Example
 
-- Example Guest component is [`crates/hello`](./crates/hello/src/lib.rs)
+- Example Guest component is [`crates/vowels`](./crates/vowels/src/lib.rs)
 - Example Host app is [`src/routes/+page.svelte`](./src/routes/+page.svelte)
 
 ## Demo
@@ -44,7 +44,7 @@ pub fn Input<'a>(name: &'a str, id: &'a str) {
 
 Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-Compile the wasm component, see [README.md](./crates/hello/README.md) for more details.
+Compile the wasm component, see [README.md](./crates/vowels/README.md) for more details.
 
 ```bash
 npm run dev

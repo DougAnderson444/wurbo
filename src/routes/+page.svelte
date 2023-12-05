@@ -3,13 +3,11 @@
 	import { browser } from '$app/environment';
 
 	// @ts-ignore
-	// Import wasm wasm component bytes as a url
-	// Can import either wasi (if you have sys dependencies such as getrandom) or unknown-unknown (if you don't)
-	// import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
-	import wasmURL from '../../crates/target/wasm32-wasi/release/hello.wasm?url';
+	// Import wasm component bytes as a url
+  import wasmURL from "../../target/wasm32-wasi/release/vowels.wasm?url";
 
 	// get imports as a string
-	import importables from './importables.js?raw';
+	import importableCode from './importables.js?raw';
 
 	/**
 	 * @type {string | null}
@@ -34,21 +32,15 @@
 
 		// @ts-ignore
 		const { load } = await import('rollup-plugin-wit-component');
-		let wasmComponentBytesToESModule = await load();
 
 		// get wasm bytes from url
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
-		let importName = './importables.js';
+		let importables = [{'wurbo:vowels/imports': importableCode}];
 
-		let imports = {
-			map: {
-				'component:cargo-comp': importName
-			},
-			files: [[importName, importables]]
-		};
+    console.log({importables});
 
-		mod = await wasmComponentBytesToESModule({ wasmBytes, imprt: imports });
+		mod = await load( wasmBytes, importables );
 
 		// @ts-ignore
 		whatSayYou = mod.render('World');

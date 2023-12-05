@@ -1,21 +1,19 @@
-//! # Wurbo
-//! A Rust library for creating web components with JSX-like syntax.
-//!
-#![allow(unused_braces)] // macro triggers this warning, disable it
+// the render crate needs braces to work
+#![allow(unused_braces)]
+
+cargo_component_bindings::generate!();
 
 mod components;
 mod input;
 mod output;
 mod utils;
 
-use std::collections::HashMap;
-use std::sync::Mutex;
-use std::sync::OnceLock;
-use std::sync::RwLock;
-
 use components::page::Page;
 use input::Input;
 use output::Output;
+
+use crate::bindings::wurbo::vowels::imports;
+use crate::bindings::Guest;
 
 use render::{
     // A macro to create components
@@ -27,6 +25,10 @@ use render::{
     // A trait for custom components
     Render,
 };
+use std::collections::HashMap;
+use std::sync::Mutex;
+use std::sync::OnceLock;
+use std::sync::RwLock;
 
 ///Maps the #elementId to the event type
 type ListenerMap = HashMap<String, &'static str>;
@@ -45,26 +47,22 @@ lazy_static::lazy_static! {
 
 static OUTPUT_ID: OnceLock<String> = OnceLock::new();
 
-pub struct Interactive;
-
-impl Interactive {
-    /// Insert the element id and event type into the LISTENERS_MAP
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// let my_CSS_selector = "#some_selector";
-    /// Interactive::activate(format!("#{my_CSS_selector}"), "keyup");
-    /// ```
-    pub fn activate(elem_id: String, ty: &'static str) {
-        let mut listeners = LISTENERS_MAP.lock().unwrap();
-        listeners.insert(elem_id, ty);
-    }
+/// Insert the element id and event type into the LISTENERS_MAP
+///
+/// # Example
+///
+/// ```rust
+/// let my_CSS_selector = "#some_selector";
+/// Interactive::activate(format!("#{my_CSS_selector}"), "keyup");
+/// ```
+pub fn track(elem_id: String, ty: &'static str) {
+    let mut listeners = LISTENERS_MAP.lock().unwrap();
+    listeners.insert(elem_id, ty);
 }
 
 struct Component;
 
-impl bindings::Example for Component {
+impl Guest for Component {
     /// Say hello!
     fn render(name: String) -> String {
         let name = &name;
@@ -95,15 +93,13 @@ impl bindings::Example for Component {
         // iterate through LISTENERS_MAP, add each using addeventlistener
         let listeners = LISTENERS_MAP.lock().unwrap();
         for (selector, ty) in listeners.iter() {
-            let deets = bindings::component::cargo_comp::imports::ListenDetails {
-                selector,
-                ty,
-                value: "TODO", // TODO: State vs Updates/Changes
+            let deets = imports::ListenDetails {
+                selector: selector.to_string(),
+                ty: ty.to_string(),
+                value: "TODO".to_string(),
             };
 
-            bindings::component::cargo_comp::imports::addeventlistener(deets);
+            imports::addeventlistener(&deets);
         }
     }
 }
-
-bindings::export!(Component);

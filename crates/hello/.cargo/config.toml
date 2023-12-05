@@ -1,4 +1,0 @@
-# Note: With `cargo component` you still need to add the args instead of relying on this config file :/
-[build]
-# target = "wasm32-unknown-unknown"
-target = "wasm32-wasi" # use if you need sys calls that would normally be provided by the browser, ie) getrandom
