@@ -1,8 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
-	import { browser } from '$app/environment';
 
-	// @ts-ignore
 	// Import wasm component bytes as a url
   import wasmURL from "../../target/wasm32-wasi/release/vowels.wasm?url";
 
@@ -10,19 +8,14 @@
 	import importableCode from './importables.js?raw';
 
 	/**
-	 * @type {string | null}
+	 * The rendered component as a string of HTML
+   * @type {string | null}
 	 */
 	let whatSayYou;
 	/**
-	 * @type {string}
-	 */
-	let code = 'Standby, generating your bundle...';
-	/**
-	 * @type {Node}
-	 */
-	let parentDiv;
-	/**
-	 * @type {{ render: (arg0: string) => string | null; listen: () => void; }}
+	 * The module that loads the WebAssembly component
+   * 
+   * @type {{ render: (arg0: string) => string | null; listen: () => void; }}
 	 */
 	let mod;
 
@@ -36,17 +29,14 @@
 		// get wasm bytes from url
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
-		let importables = [{'wurbo:vowels/imports': importableCode}];
-
-    console.log({importables});
+		let importables = [{'demo:vowels/imports': importableCode}];
 
 		mod = await load( wasmBytes, importables );
 
 		// @ts-ignore
 		whatSayYou = mod.render('World');
 		// @ts-ignore
-		window.render = mod.render; // expose render function to blob URLs
-		// await tick(); // wait for the DOM to be updated with the new Elements
+		window.wurbo =  { "render": mod.render }; // expose render function to blob URLs
 
 		// Listen for messages from the Blob URLs created in wasmComponentBytesToESModule
 		bc.onmessage = (event) => {
@@ -69,17 +59,17 @@
 		};
 	});
 
-	// need to apply listeners very time the DOM gets new render!
+	// need to apply listeners every time the DOM renders!
 	$: if (whatSayYou && mod)
 		(async () => {
 			// wait for the DOM to reflect the updates first
 			await tick();
 			mod.listen();
-			// put focus back on thelast focused element
+      console.log(`listening timestamp ${Date.now()}`);
 		})();
 </script>
 
-<div bind:this={parentDiv}>
+<div>
 	{#if whatSayYou}
 		{@html whatSayYou}
 	{/if}
