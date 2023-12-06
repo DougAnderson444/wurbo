@@ -12,7 +12,7 @@ use components::page::Page;
 use input::Input;
 use output::Output;
 
-use crate::bindings::wurbo::vowels::imports;
+use crate::bindings::demo::vowels::imports;
 use crate::bindings::Guest;
 
 use render::{

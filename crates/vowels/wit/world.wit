@@ -1,4 +1,4 @@
-package wurbo:vowels;
+package demo:vowels;
 
 interface types {
 
