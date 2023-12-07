@@ -1,12 +1,13 @@
 // The main library file
 // exports all the functions that are available to the user
+import { LISTENER_UPDATES } from './constants.js';
 
-export function listen(mod) {
+function listen(mod) {
 	// expose render function to blob URLs
 	window.wurbo = { render: mod.render };
 
 	// Set up a broadcast channel to listen for updates from the Blob URLs
-	const bc = new BroadcastChannel('listener_updates');
+	const bc = new BroadcastChannel(LISTENER_UPDATES);
 
 	// Listen for messages from the Blob URLs
 	bc.onmessage = (event) => {
@@ -27,3 +28,5 @@ export function listen(mod) {
 		console.warn('No element found with id: ', id);
 	};
 }
+
+export { listen, LISTENER_UPDATES };
