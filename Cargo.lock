@@ -174,9 +174,6 @@ name = "vowels"
 version = "0.1.0"
 dependencies = [
  "cargo-component-bindings",
- "getrandom",
- "lazy_static",
- "nanoid",
  "render",
  "wurbo",
 ]
@@ -201,5 +198,6 @@ name = "wurbo"
 version = "0.1.0"
 dependencies = [
  "lazy_static",
+ "nanoid",
  "render",
 ]

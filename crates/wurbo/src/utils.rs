@@ -12,10 +12,3 @@ pub fn rand_id() -> String {
     let id = nanoid!(16, &ALPHABET);
     id
 }
-
-/// Fill a 32 byte buffer with random data
-pub fn get_random_buf() -> Result<[u8; 32], getrandom::Error> {
-    let mut buf = [0u8; 32];
-    getrandom::getrandom(&mut buf)?;
-    Ok(buf)
-}

@@ -1,24 +1,115 @@
 // the render crate needs braces to work
 #![allow(unused_braces)]
+#![doc = include_str!("../../../README.md")]
 
-// This macro takes $page, $input, $output and $imports and generates the Trait and the
-// default implementations using the given variables. The macro should also take care of importing
-// the necessary dependencies.
+pub mod utils;
 
+/// Prelude to ensure all users have the required deps
+pub mod prelude {
+    pub use crate::utils;
+    pub use lazy_static::lazy_static;
+    pub use render::{
+        // A macro to create components
+        component,
+        // A macro to render components in JSX fashion
+        html,
+        // A macro to compose components in JSX fashion
+        rsx,
+        // A trait for custom components
+        Render,
+    };
+}
+
+/// This macro takes $page, $input, $output and $imports and generates the Trait and the
+/// default implementations using the given variables. The macro should also take care of importing
+/// the necessary dependencies.
+///
+/// This macro generates the Trait and the default implementations using the given variables.
+/// The macro should also take care of importing the necessary dependencies.
+///
+/// # Example
+/// (disable doctest for this example)
+/// ```ignore
+/// use wurbo::generate_reactivity;
+/// use render::{
+///     // A macro to create components
+///     component,
+///     // A macro to render components in JSX fashion
+///     html,
+///     // A macro to compose components in JSX fashion
+///     rsx,
+///     // A trait for custom components
+///     Render,
+/// };
+///
+/// use crate::bindings::exports::demo::vowels::reactivity::Guest as WurboGuest;
+/// use crate::bindings::demo::vowels::imports; // so the macro has access to the imports::types
+///
+/// /// The WIT Component struct for implementing the Guest trait
+/// struct Component;
+///
+//? #[component]
+/// pub fn Page<'a, Children: Render>(title: &'a str, children: Children) {
+///     rsx! {
+///       <div class={"p-4"}>
+///         <div>
+///             {children}
+///         </div>
+///       </div>
+///     }
+/// }
+///
+///
+/// #[component]
+/// pub fn Input<'a>(name: &'a str, id: &'a str) {
+///     // Type of event listener to listen for
+///     let ty = "keyup";
+///
+///     // Add this CSS selector to the list of selectors that will add event listeners
+///     super::wurbo_tracker::track(format!("#{id}"), ty);
+///
+///     rsx! {
+///         <div>
+///             <div>
+///                 {"The data you enter can't be seen by anyone else, since it's in a WebAssembly sandbox. =)"}
+///             </div>
+///             <input id
+///             value={name}
+///             />
+///             <div>
+///                {"But it can still calculate how many vowels are in your words for you!"}
+///             </div>
+///         </div>
+///     }
+/// }
+///
+/// #[component]
+/// pub fn Output<'a>(name: &'a str, id: &'a str) {
+///     let count = count_vowels(name);
+///
+///     rsx! {
+///         <div id>
+///         <b>{name}</b>
+///             {
+///                 match count {
+///                     0 => { " has no vowels.".to_string() } ,
+///                     1 => {format!(" has {count} vowel.")}
+///                     _ => {format!(" has {count} vowels.")}
+///                 }
+///             }
+///             <br/>
+///         </div>
+///     }
+/// }
+///
+/// /// The macro combines your components together and injects the reactivity:
+/// generate_reactivity! { WurboGuest, Component, Page, Input, Output, imports }
+/// ```
 #[macro_export]
 macro_rules! generate_reactivity {
     ($guest: ident, $component: ident, $page:ident, $input:ident, $output:ident, $imports:ident) => {
-        // include all the deps and static variables in this macro
-        use render::{
-            // A macro to create components
-            component,
-            // A macro to render components in JSX fashion
-            html,
-            // A macro to compose components in JSX fashion
-            rsx,
-            // A trait for custom components
-            Render,
-        };
+        use $crate::prelude::*;
+
         use std::collections::HashMap;
         use std::sync::Mutex;
         use std::sync::OnceLock;
@@ -30,7 +121,7 @@ macro_rules! generate_reactivity {
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
         // See https://crates.io/crates/lazy_static
-        lazy_static::lazy_static! {
+        lazy_static! {
           // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
           static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
           // is_initialized

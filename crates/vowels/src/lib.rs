@@ -3,12 +3,21 @@
 
 cargo_component_bindings::generate!();
 
+use render::{
+    // A macro to create components
+    component,
+    // A macro to render components in JSX fashion
+    html,
+    // A macro to compose components in JSX fashion
+    rsx,
+    // A trait for custom components
+    Render,
+};
+use wurbo::generate_reactivity;
+
 mod components;
 mod input;
 mod output;
-mod utils;
-
-use wurbo::generate_reactivity;
 
 use components::page::Page;
 use input::Input;
