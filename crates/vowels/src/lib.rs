@@ -45,6 +45,7 @@ lazy_static::lazy_static! {
   static ref IS_INITIALIZED: RwLock<bool> = RwLock::new(false);
 }
 
+/// The HTML element id of the output section so we can surgically render re-render it
 static OUTPUT_ID: OnceLock<String> = OnceLock::new();
 
 /// Insert the element id and event type into the LISTENERS_MAP
@@ -60,6 +61,7 @@ pub fn track(elem_id: String, ty: &'static str) {
     listeners.insert(elem_id, ty);
 }
 
+/// The WIT Component struct for implementing the Guest trait
 struct Component;
 
 impl Guest for Component {
@@ -70,6 +72,7 @@ impl Guest for Component {
         // If you want to print in the console:
         // bindings::component::cargo_comp::imports::prnt(&format!("OUTPUT_ID? {OUTPUT_ID.get().unwrap()}"));
 
+        // If OUTPUT_ID is not set, render the whole page since we are in the initial state
         if OUTPUT_ID.get().is_none() {
             #[allow(clippy::redundant_closure)]
             let id: &String = OUTPUT_ID.get_or_init(|| utils::rand_id());
@@ -82,6 +85,8 @@ impl Guest for Component {
               </Page>
             }
         } else {
+            // If OUTPUT_ID is set, render only the output section
+            // This is so we keep our INPUT event listeners which were set above
             // Render and return only the output section of HTML
             html! {
               <Output name id={OUTPUT_ID.get().unwrap()} />
