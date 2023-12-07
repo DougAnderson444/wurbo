@@ -37,9 +37,9 @@ Table Summary:
 
 | Step | WIT | Rust | JavaScript |
 | --- | --- | --- | --- |
-| 1 | declare interface `imports` | pass `imports` to macro | implement `imports` and pass stringified code to `rollup-plugin-wit-component` fn `load` via `importables` |
-| 2 | declare interface `reactivity` | implement interface `reactvity` using the macro | load `reactivity` ES module using `rollup-plugin-wit-component` |
-| 3 | Ready. | Ready. | call `mod.reactivity.render(args)` to get rendered HTML |
+| 1 | declare interface `imports` | pass `imports` to `wurbo` macro | implement `imports` as JS code then pass stringified code to `rollup-plugin-wit-component` fn `load` via `importables` |
+| 2 | declare interface `reactivity` | implement interface `reactvity` using the macro and your [`render` crate](https://crates.io/crates/render) Components | load `reactivity` ES module using `rollup-plugin-wit-component` |
+| 3 | Ready. | call `cargo component build --release` | call `mod.reactivity.render(args)` to get rendered HTML |
 | 4 | Ready. | Ready. | call `wurbo.listen(mod)` to set up listeners |
 | 5 | Ready. | Ready. | When DOM has loaded the rendered HTML, then call `mod.reactivity.activate()` to actually listen |
 
