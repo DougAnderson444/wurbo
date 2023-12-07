@@ -2,6 +2,9 @@
 members = ["crates/*"]
 resolver = "2"
 
+[workspace.dependencies]
+wurbo = { path = "crates/wurbo" }
+
 [profile.release]
 opt-level = "z"          # Optimize for size.
 lto = true               # Enable Link Time Optimization

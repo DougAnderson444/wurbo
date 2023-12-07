@@ -6,7 +6,7 @@ pub fn Input<'a>(name: &'a str, id: &'a str) {
     let ty = "keyup";
 
     // Add this CSS selector to the list of selectors that will add event listeners
-    super::track(format!("#{id}"), ty);
+    super::wurbo_tracker::track(format!("#{id}"), ty);
 
     rsx! {
         <div>

@@ -4,7 +4,7 @@ import { CHANNEL_NAME, GLOBAL_NAMESPACE } from './constants.js';
 
 function listen(mod) {
 	// expose render function to blob URLs
-	window[GLOBAL_NAMESPACE] = { render: mod.render };
+	window[GLOBAL_NAMESPACE] = { render: mod.reactivity.render };
 
 	// Set up a broadcast channel to listen for updates from the Blob URLs
 	const bc = new BroadcastChannel(CHANNEL_NAME);

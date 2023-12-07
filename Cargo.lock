@@ -178,6 +178,7 @@ dependencies = [
  "lazy_static",
  "nanoid",
  "render",
+ "wurbo",
 ]
 
 [[package]]
@@ -198,3 +199,7 @@ dependencies = [
 [[package]]
 name = "wurbo"
 version = "0.1.0"
+dependencies = [
+ "lazy_static",
+ "render",
+]

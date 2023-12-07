@@ -23,14 +23,16 @@ interface imports {
 
 }
 
-/// An example world for the component to target.
-world example {
-  
-  import imports;
-
-  // renders the initial Web component with the given JSON data
-  export render: func(name: string) -> string;
+interface reactivity {
+  // renders the initial Web component with the given data
+  render: func(name: string) -> string;
 
   // activate listening 
-  export activate: func();
+  activate: func();
+}
+
+/// An example world for the component to target.
+world example {
+  import imports;
+  export reactivity;
 }

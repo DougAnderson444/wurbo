@@ -9,7 +9,7 @@ export function prnt(string) {
 }
 
 /**
- * @param {string} ty - type of event to listen for
+ * @param {{selector: string, ty: string, value: string}} param0 - The CSS selector we want to listen on, ty is the event type, value
  * @param {function} handler - function to run when event is triggered
  */
 export function addeventlistener({ selector, ty, value }) {

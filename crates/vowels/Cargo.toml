@@ -12,6 +12,8 @@ lazy_static = "1.4.0"
 nanoid = "0.4.0"
 getrandom = "0.2"
 
+wurbo = { workspace = true }
+
 [lib]
 crate-type = ["cdylib"]
 
