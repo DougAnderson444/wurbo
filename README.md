@@ -4,7 +4,7 @@ Proof of concept web framework using [wasm components](https://github.com/WebAss
 
 Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Components](https://github.com/WebAssembly/component-model). Kind of like [Elm](https://guide.elm-lang.org/architecture/) too? Render HTML from wasm ui components.
 
-## Short Video Hype
+## Short Video Hype 
 
 [![Wurbo Demo](https://i.ytimg.com/vi/x2ooLUTYuQk/oar2.jpg?sqp=-oaymwEaCN0CENAFSFXyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLAyYw1c2XvGjZwgVg1RdG_mjE7s9Q)](https://www.youtube.com/shorts/x2ooLUTYuQk)
 
@@ -17,38 +17,30 @@ Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Componen
 
 The example is demonstrated at [https://douganderson444.github.io/wurbo](https://douganderson444.github.io/wurbo/)
 
-## Design
+## Use Steps
 
-This is ever changing experiment, so see the code for the latest API.
+1. In your WIT file:
+- declare interface named `reactivity` with functions `render` and `activate`
+- a separate interface (named anything you like, such as `imports`) with function `addeventlistener`
 
-Your WIT component and world must implement:
+2. In the Rust: 
+- `use` the `wurbo` crate's macro to implement the `reactivity` interface for `reactivity::Guest`. 
+- build your own `Page` parent component and `Input` / `Output` components as you like for your user interface.
 
-```wit
-  // renders the initial Web component with the given JSON data
-  export render: func(name: string) -> string;
+3. In JavaScript: 
+- `load` the wasm bytes + importables into an ES module (called it `mod`) using `rollup-plugin-wit-component`
+- `mod.reactivity.render(args)` uses that module to load the initial data.
+- `wurbo.listen(mod)` listens for events from the component
+- call `mod.reactivity.activate()` once the DOM has loaded, to start listening for change events.
 
-  // activate listening 
-  export activate: func();
-```
+Table Summary:
 
-The JavaScript then calls `render` with the initial data, and once the DOM has loaded, calls `activate` to start listening for events.
-
-```js
-// example: ./src/routes/+page.svelte
-
-// load the import handles into the Wasm component and get the ES module returned
-mod = await load( wasmBytes, importables );
-
-// call `render` with your inputs for the component
-let rendered = mod.render('World');
-
-// lisen for events from the component 
-wurbo.listen(mod);
-
-// ... later, when you know the DOM has loaded the `rendered` HTML
-// activate the event listeners on the rendered HTML
-mod.activate();
-```
+| Step | WIT | Rust | JavaScript |
+| --- | --- | --- | --- |
+| 1 | declare interface `reactivity` | implement interface `reactvity` using the macro | load `reactivity` ES module using `rollup-plugin-wit-component` |
+| 2 | declare interface `imports` | pass `imports` to macro | call `mod.reactivity.render(args)` to get rendered HTML |
+| 3 | | | call `wurbo.listen(mod)`|
+| 4 | | | When DOM has loaded the rendered HTML, then call `mod.reactivity.activate()` |
 
 ## Developing
 
