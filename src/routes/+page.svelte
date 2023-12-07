@@ -12,7 +12,7 @@
 	 * The rendered component as a string of HTML
    * @type {string | null}
 	 */
-	let whatSayYou;
+	let renderedHTML;
 	/**
 	 * The module that loads the WebAssembly component
    * 
@@ -34,26 +34,25 @@
 		mod = await load( wasmBytes, importables );
 
 		// call `render` with your inputs for the component
-		whatSayYou = mod.render('Worldz');
+    renderedHTML = mod.render('World');
 
     // lisen for events from the component 
     wurbo.listen(mod);
 
 	});
 
-	// need to apply listeners every time the DOM renders!
-	$: if (whatSayYou && mod)
+	// Once the HTML is rendered and the module is loaded, we can activate the event emitters
+	$: if (renderedHTML && mod)
 		(async () => {
-			// wait for the DOM to reflect the updates first
+      // wait for the DOM to reflect the updates first
 			await tick();
       // once the DOM has our elements loaded, we can activate the event emitters
 			mod.activate();
-      console.log(`listening timestamp ${Date.now()}`);
 		})();
 </script>
 
 <div>
-	{#if whatSayYou}
-		{@html whatSayYou}
+	{#if renderedHTML}
+		{@html renderedHTML}
 	{/if}
 </div>

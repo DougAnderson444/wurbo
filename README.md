@@ -17,9 +17,38 @@ Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Componen
 
 The example is demonstrated at [https://douganderson444.github.io/wurbo](https://douganderson444.github.io/wurbo/)
 
-## API 
+## Design
 
 This is ever changing experiment, so see the code for the latest API.
+
+Your WIT component and world must implement:
+
+```wit
+  // renders the initial Web component with the given JSON data
+  export render: func(name: string) -> string;
+
+  // activate listening 
+  export activate: func();
+```
+
+The JavaScript then calls `render` with the initial data, and once the DOM has loaded, calls `activate` to start listening for events.
+
+```js
+// example: ./src/routes/+page.svelte
+
+// load the import handles into the Wasm component and get the ES module returned
+mod = await load( wasmBytes, importables );
+
+// call `render` with your inputs for the component
+let rendered = mod.render('World');
+
+// lisen for events from the component 
+wurbo.listen(mod);
+
+// ... later, when you know the DOM has loaded the `rendered` HTML
+// activate the event listeners on the rendered HTML
+mod.activate();
+```
 
 ## Developing
 
@@ -28,15 +57,15 @@ Once you've created a project and installed dependencies with `npm install` (or 
 Compile the wasm component, see [README.md](./crates/vowels/README.md) for more details.
 
 ```bash
-npm run dev
+npm run build
 
 # or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm run preview -- --open
 ```
 
 ## Building
 
-To create a production version of your app:
+To build the code (dev mode does not work due to how Vite handles wasm):
 
 ```bash
 npm run build
