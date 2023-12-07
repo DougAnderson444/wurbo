@@ -1,13 +1,13 @@
 // The main library file
 // exports all the functions that are available to the user
-import { LISTENER_UPDATES } from './constants.js';
+import { CHANNEL_NAME, GLOBAL_NAMESPACE } from './constants.js';
 
 function listen(mod) {
 	// expose render function to blob URLs
-	window.wurbo = { render: mod.render };
+	window[GLOBAL_NAMESPACE] = { render: mod.render };
 
 	// Set up a broadcast channel to listen for updates from the Blob URLs
-	const bc = new BroadcastChannel(LISTENER_UPDATES);
+	const bc = new BroadcastChannel(CHANNEL_NAME);
 
 	// Listen for messages from the Blob URLs
 	bc.onmessage = (event) => {
@@ -29,4 +29,4 @@ function listen(mod) {
 	};
 }
 
-export { listen, LISTENER_UPDATES };
+export { listen, CHANNEL_NAME, GLOBAL_NAMESPACE };

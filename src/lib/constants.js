@@ -1,1 +1,2 @@
-export const LISTENER_UPDATES = 'listener_updates';
+export const CHANNEL_NAME = 'listener_updates';
+export const GLOBAL_NAMESPACE = 'wurbo';
