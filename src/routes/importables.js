@@ -13,6 +13,10 @@ export function prnt(string) {
  * @param {function} handler - function to run when event is triggered
  */
 export function addeventlistener({ selector, ty, value }) {
+	// The Broadcast channel name must be the same as the Wurbo
+	// We could import the constant from Wurbo, but this would involve a bundle step to resolve all the code into a single file
+	// Here we use it by string to show how it works
+	// If you want to import and bundle it, go right ahead
 	const bc = new BroadcastChannel('listener_updates');
 	let elem = document.querySelector(selector);
 	document.querySelector(selector).addEventListener(ty, (e) => {
