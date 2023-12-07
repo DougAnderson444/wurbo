@@ -1,8 +1,13 @@
-// This  code must be stand alone (or bundled into a stand alone bundle)
-// as it gets stringified and rolled up into the bundle of BobURL code that loads the wasm
+// This code must be stand alone and 100% resolved into this single file
+// as it gets stringified and rolled up into the bundle of BlobURL code that loads the wasm
+
+// You could alternatively use the constant, but this would involve a bundle step to resolve all the code into a single file
+// import { LISTENER_UPDATES } from 'wurbo';
+
 export function prnt(string) {
 	console.log(string);
 }
+
 /**
  * @param {string} ty - type of event to listen for
  * @param {function} handler - function to run when event is triggered
