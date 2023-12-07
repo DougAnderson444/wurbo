@@ -1,7 +1,7 @@
 // The main library file
 // exports all the functions that are available to the user
 
-export function setup(mod) {
+export function listen(mod) {
 	// expose render function to blob URLs
 	window.wurbo = { render: mod.render };
 

@@ -1,6 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
-  import { setup } from 'wurbo';
+  import * as wurbo from 'wurbo';
 
 	// Import wasm component bytes as a url
   import wasmURL from "../../target/wasm32-wasi/release/vowels.wasm?url";
@@ -21,23 +21,23 @@
 	let mod;
 
 	onMount(async () => {
-		// Set up a broadcast channel to listen for updates from the Blob URLs
-		const bc = new BroadcastChannel('listener_updates');
-
-		// @ts-ignore
+    // ensure you are in the Browser environment to rollup your WIT Component
 		const { load } = await import('rollup-plugin-wit-component');
 
-		// get wasm bytes from url
+		// get your wasm bytes from your storage source
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
+    // define the import handles you are giving to your component
 		let importables = [{'demo:vowels/imports': importableCode}];
 
+    // load the import handles into the Wasm component and get the ES module returned
 		mod = await load( wasmBytes, importables );
 
-		// @ts-ignore
-		whatSayYou = mod.render('World');
+		// call `render` with your inputs for the component
+		whatSayYou = mod.render('Worldz');
 
-    setup(mod);
+    // lisen for events from the component 
+    wurbo.listen(mod);
 
 	});
 
@@ -46,7 +46,8 @@
 		(async () => {
 			// wait for the DOM to reflect the updates first
 			await tick();
-			mod.listen();
+      // once the DOM has our elements loaded, we can activate the event emitters
+			mod.activate();
       console.log(`listening timestamp ${Date.now()}`);
 		})();
 </script>
