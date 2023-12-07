@@ -1,6 +1,6 @@
 // the render crate needs braces to work
 #![allow(unused_braces)]
-#![doc = include_str!("../../../README.md")]
+#![doc = include_str!("../README.md")]
 
 pub mod utils;
 
