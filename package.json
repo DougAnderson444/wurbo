@@ -1,11 +1,25 @@
 {
 	"name": "wurbo",
 	"version": "0.0.1",
-	"private": true,
+	"license": "MIT",
+	"author": "DougAnderson444 <DougAnderson444@gmail.com>",
+	"description": "A tiny front-end framework for webassembly components",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DougAnderson444/wurbo.git"
+	},
+	"homepage": "https://github.com/DougAnderson444/wurbo",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		}
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"package": "svelte-package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"test:unit": "vitest",
@@ -20,7 +34,7 @@
 		"postcss": "^8.4.24",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
-		"rollup-plugin-wit-component": "^0.1.0",
+		"rollup-plugin-wit-component": "^0.1.1",
 		"svelte": "^4.0.0",
 		"svelte-check": "^3.4.3",
 		"tailwindcss": "^3.3.2",
