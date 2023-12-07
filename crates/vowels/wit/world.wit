@@ -32,5 +32,5 @@ world example {
   export render: func(name: string) -> string;
 
   // activate listening 
-  export listen: func();
+  export activate: func();
 }

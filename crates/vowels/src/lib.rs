@@ -94,8 +94,8 @@ impl Guest for Component {
         }
     }
 
-    fn listen() {
-        // iterate through LISTENERS_MAP, add each using addeventlistener
+    /// Activate the component listeners
+    fn activate() {
         let listeners = LISTENERS_MAP.lock().unwrap();
         for (selector, ty) in listeners.iter() {
             let deets = imports::ListenDetails {
