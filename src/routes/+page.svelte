@@ -1,5 +1,6 @@
 <script>
 	import { onMount, tick } from 'svelte';
+  import { setup } from 'wurbo';
 
 	// Import wasm component bytes as a url
   import wasmURL from "../../target/wasm32-wasi/release/vowels.wasm?url";
@@ -35,28 +36,9 @@
 
 		// @ts-ignore
 		whatSayYou = mod.render('World');
-		// @ts-ignore
-		window.wurbo =  { "render": mod.render }; // expose render function to blob URLs
 
-		// Listen for messages from the Blob URLs created in wasmComponentBytesToESModule
-		bc.onmessage = (event) => {
-			// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
-			let id =
-				new DOMParser().parseFromString(event.data || '', 'text/html')?.body?.firstElementChild
-					?.id || null;
-			// if the id is not null, then we can update the html with the new string
-			if (id) {
-				// @ts-ignore
-				let chosen = document.getElementById(id);
-				if (chosen) {
-					// @ts-ignore
-					chosen.outerHTML = event.data;
-					return;
-				}
-			}
-			// else, replace all the html with the new string
-			whatSayYou = event.data;
-		};
+    setup(mod);
+
 	});
 
 	// need to apply listeners every time the DOM renders!

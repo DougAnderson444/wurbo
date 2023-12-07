@@ -1,4 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
+import { vitePreprocess } from '@sveltejs/kit/vite';
 
 export const serverPath = '/wurbo';
 
@@ -15,8 +16,12 @@ const config = {
 		}),
 		paths: {
 			base: serverPath // process.env.NODE_ENV === 'development' || process.argv.includes('dev') ? '' : serverPath
+		},
+		alias: {
+			wurbo: './src/lib/index.js'
 		}
-	}
+	},
+	preprocess: vitePreprocess()
 };
 
 export default config;
