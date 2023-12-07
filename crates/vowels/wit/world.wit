@@ -32,7 +32,7 @@ interface reactivity {
 }
 
 /// An example world for the component to target.
-world example {
+world main {
   import imports;
   export reactivity;
 }
