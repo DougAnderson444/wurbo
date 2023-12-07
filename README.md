@@ -17,28 +17,9 @@ Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Componen
 
 The example is demonstrated at [https://douganderson444.github.io/wurbo](https://douganderson444.github.io/wurbo/)
 
-## Interactivity
+## API 
 
-1. Setup interactivity with HTMLElements by first activating them with `Interactive::activate(selector, event_type)`.
-
-```rust
-use render::{component, html, rsx, Render};
-
-#[component]
-pub fn Input<'a>(name: &'a str, id: &'a str) {
-    // Type of event listener to listen for
-    let ty = "keyup";
-
-    // Add this CSS selector to the list of selectors that will add event listeners
-    Interactive::activate(format!("#{id}"), ty);
-
-    rsx! {
-        <input id value={name} />
-    }
-}
-```
-
-2. Once your HTML has mounted to the DOM and the CSS selectors are available, your app calls `listen()` and the list of selectors are activated.
+This is ever changing experiment, so see the code for the latest API.
 
 ## Developing
 
