@@ -17,3 +17,9 @@ authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 render = "0.3.1"
 lazy_static = "1.4.0"
 nanoid = "0.4.0"
+thiserror = "1.0"
+
+# TODO: feature jinja
+minijinja = { version = "1.0.9" }
+serde_json = "1.0.68"
+serde = { version = "1.0.130", features = ["derive"] }
