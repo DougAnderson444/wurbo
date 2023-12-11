@@ -9,6 +9,12 @@ impl From<minijinja::Error> for RenderError {
     }
 }
 
+impl From<RenderError> for String {
+    fn from(e: RenderError) -> Self {
+        e.to_string()
+    }
+}
+
 /// impl Display for RenderError
 impl std::fmt::Display for RenderError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

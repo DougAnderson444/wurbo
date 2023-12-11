@@ -24,10 +24,17 @@ interface types {
     id: option<string>
   }
 
-  record context {
+  // COntent for the entire page
+  record content {
     page: page,
     input: input,
     output: output
+  }
+
+  // Context variants
+  variant context {
+    content(content),
+    output(output)
   }
 
 }
@@ -55,7 +62,7 @@ interface reactivity {
   use types.{context};
 
   // renders the initial Web component with the given data
-  render: func(ctx: context) -> string;
+  render: func(ctx: context) -> result<string, string>;
 
   // activate listening 
   activate: func();

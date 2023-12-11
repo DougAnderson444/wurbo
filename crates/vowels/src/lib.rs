@@ -18,6 +18,7 @@ mod utils;
 // use output::Output;
 
 use crate::bindings::demo::vowels::imports;
+use crate::bindings::demo::vowels::types;
 use crate::bindings::exports::demo::vowels::reactivity;
 // use crate::bindings::Guest;
 
@@ -45,43 +46,46 @@ fn get_templates() -> Vec<(&'static str, &'static str)> {
 reactivity_bindgen! {}
 
 impl reactivity::Guest for Component {
-    fn render(context: reactivity::Context) -> String {
+    fn render(context: types::Context) -> Result<String, String> {
         let templates = get_templates();
 
-        imports::prnt(&format!("context: {:?}", context));
-        if context.output.id.is_none() {
-            let id: &String = OUTPUT_ID.get_or_init(|| utils::rand_id());
-
-            // update the context with the new output id
-            let mut context = context;
-            context.output.id = Some(id.clone());
-
-            wurbo::jinja::render(
-                "page.html",
-                &templates,
-                PageContext::from(context),
-                Some(wurbo_tracker::track),
-            )
-            .unwrap()
-        } else {
-            // just send the output context to "output.html"
-            imports::prnt(&format!("output context: {:?}", context.output));
-            wurbo::jinja::render("output.html", &templates, PageContext::from(context), None)
-                .map_err(|e| {
-                    imports::prnt(&format!("error: {:?}", e));
-                    e
-                })
-                .unwrap()
+        match context {
+            types::Context::Content(c) => {
+                let page_context = PageContext::from(c);
+                Ok(wurbo::jinja::render(
+                    "page.html",
+                    &templates,
+                    page_context,
+                    Some(wurbo_tracker::track),
+                )?)
+            }
+            types::Context::Output(o) => {
+                let output = Output::from(o);
+                // Build a PageContext with the given Output, as we need to pass an entire PageContext to the template
+                // since the template uses "output.name", etc. this needs to be prepended. The
+                // defaults are discarded in rendering since they don't apply to the output
+                // template
+                let pcontext = PageContext {
+                    output: output.clone(),
+                    ..Default::default()
+                };
+                Ok(wurbo::jinja::render(
+                    "output.html",
+                    &templates,
+                    pcontext,
+                    None,
+                )?)
+            }
         }
     }
 
     fn activate() {
         let listeners = LISTENERS_MAP.lock().unwrap();
-        for (selector, ty) in listeners.iter() {
+        for (selector, (ty, outputid)) in listeners.iter() {
             let deets = imports::ListenDetails {
                 selector: selector.to_string(),
                 ty: ty.to_string(),
-                outputid: OUTPUT_ID.get().unwrap().clone(),
+                outputid: outputid.to_string(),
             };
 
             imports::addeventlistener(&deets);
@@ -90,7 +94,7 @@ impl reactivity::Guest for Component {
 }
 
 /// PageContext is the context with impl of StructObject
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct PageContext {
     page: Page,
     input: Input,
@@ -112,8 +116,8 @@ impl StructObject for PageContext {
     }
 }
 
-impl From<reactivity::Context> for PageContext {
-    fn from(context: reactivity::Context) -> Self {
+impl From<types::Content> for PageContext {
+    fn from(context: types::Content) -> Self {
         PageContext {
             page: Page {
                 title: context.page.title,
@@ -130,7 +134,7 @@ impl From<reactivity::Context> for PageContext {
 }
 
 /// Page is the wrapper for Input and Output
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 struct Page {
     title: String,
 }
@@ -150,7 +154,7 @@ impl StructObject for Page {
 }
 
 /// Input is the input form(s)
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 struct Input {
     placeholder: String,
 }
@@ -170,7 +174,7 @@ impl StructObject for Input {
 }
 
 /// Output is the output area
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 struct Output {
     name: String,
     id: Option<String>,
@@ -196,5 +200,14 @@ impl StructObject for Output {
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
         Some(&["name", "count", "id"])
+    }
+}
+
+impl From<types::Output> for Output {
+    fn from(context: types::Output) -> Self {
+        Output {
+            name: context.name,
+            id: context.id,
+        }
     }
 }

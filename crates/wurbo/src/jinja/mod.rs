@@ -23,14 +23,14 @@ use minijinja::value::{StructObject, Value};
 use minijinja::Environment;
 
 /// Represents the context for the page
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 pub struct PageContext {
     page: Page,
     input: Input,
     output: Output,
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 struct Page {
     title: String,
 }
@@ -49,7 +49,7 @@ impl StructObject for Page {
     }
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 struct Input {
     placeholder: String,
 }
@@ -68,7 +68,7 @@ impl StructObject for Input {
     }
 }
 
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 struct Output {
     name: String,
 }
@@ -115,21 +115,14 @@ pub fn render(
     templates: &[(&str, &str)],
     // as long as ctx_struct implements StructObject, we can use it
     ctx_struct: impl StructObject + 'static,
-    tracker: Option<fn(String, String) -> String>,
+    tracker: Option<fn(String, String, String) -> String>,
 ) -> Result<String, error::RenderError> {
-    println!("rendering: {}", entry);
-    println!("templates: {:?}", templates);
-    println!("tracker: {:?}", tracker);
-
     let mut env = Environment::new();
 
     templates.iter().for_each(|(name, template)| {
-        println!("adding template: {}", name);
         env.add_template(name, template)
             .expect("template should be added");
     });
-
-    println!("templates loaded");
 
     if let Some(tracker) = tracker {
         env.add_filter("on", tracker);
@@ -137,12 +130,22 @@ pub fn render(
 
     let ctx = Value::from_struct_object(ctx_struct);
 
-    println!("loaded ctx: {:?}", ctx);
-
     let tmpl = env.get_template(entry)?;
 
-    let rendered = tmpl.render(&ctx)?;
-    println!("rendered: {}", rendered);
+    let rendered = match tmpl.render(&ctx) {
+        Ok(rendered) => rendered,
+        Err(e) => {
+            println!("Could not render template: {:#}", e);
+            // render causes as well
+            let mut err = &e as &dyn std::error::Error;
+            while let Some(next_err) = err.source() {
+                println!();
+                println!("caused by: {:#}", next_err);
+                err = next_err;
+            }
+            return Err(error::RenderError::from(e));
+        }
+    };
     Ok(rendered)
 }
 
@@ -157,7 +160,7 @@ macro_rules! reactivity_bindgen {
         use std::sync::RwLock;
 
         ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, String>;
+        type ListenerMap = HashMap<String, (String, String)>;
 
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
@@ -174,17 +177,17 @@ macro_rules! reactivity_bindgen {
 
         // unique namespace to clairfy and avoid collisions with other Guest code
         mod wurbo_tracker {
-            /// Insert the element id and event type into the LISTENERS_MAP
+            /// Insert the source element id, event type, and target output id into the LISTENERS_MAP
             ///
             /// # Example
             ///
             /// ```rust
             /// let my_CSS_selector = "#some_selector";
-            /// Interactive::activate(format!("#{my_CSS_selector}"), "keyup");
+            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id");
             /// ```
-            pub fn track(elem_id: String, ty: String) -> String {
+            pub fn track(elem_id: String, ty: String, outputid: String) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
-                listeners.insert(format!("#{elem_id}"), ty);
+                listeners.insert(format!("#{elem_id}"), (ty, outputid));
                 elem_id
             }
         }
