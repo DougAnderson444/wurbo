@@ -22,23 +22,17 @@ mod utils;
 // use output::Output;
 
 use crate::bindings::demo::vowels::imports;
-use crate::bindings::demo::vowels::types;
-use crate::bindings::exports::demo::vowels::reactivity;
-// use crate::bindings::Guest;
+use crate::bindings::demo::vowels::types::{self, Context as WitContext};
+use crate::bindings::exports::demo::vowels::reactivity::Guest as WurboGuest;
 
 /// The WIT Component struct for implementing the Guest trait
 struct Component;
-
-// use the macro to generate and implement the WurboGuest implementations for your Components
-// generate_reactivity! { WurboGuest, Component, Page, Input, Output, imports }
-
-// ($guest: ident, $component: ident, $templates:ident, $context:ident, $imports:ident) => {
-// reactivity_bindgen! { WurboGuest, Component, templates, Context, imports }
 
 // impl Guest for Component {
 //  // other Guest functions can go here as required.
 // }
 
+/// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
         Index::new("page.html", include_str!("templates/page.html")),
@@ -50,60 +44,12 @@ fn get_templates() -> Templates {
     templates
 }
 
-reactivity_bindgen! {}
-
-impl reactivity::Guest for Component {
-    fn render(context: types::Context) -> Result<String, String> {
-        let templates = get_templates();
-
-        println!("rendering ctx: {:?}", context);
-
-        match context {
-            types::Context::Content(c) => {
-                let page_context = PageContext::from(c);
-                Ok(wurbo::jinja::render(
-                    templates.entry.name,
-                    templates,
-                    page_context,
-                    Some(wurbo_tracker::track),
-                )?)
-            }
-            types::Context::Output(o) => {
-                let output = Output::from(o);
-                // Build a PageContext with the given Output, as we need to pass an entire PageContext to the template
-                // since the template uses "output.name", etc. this needs to be prepended. The
-                // defaults are discarded in rendering since they don't apply to the output
-                // template
-                let pcontext = PageContext {
-                    output: output.clone(),
-                    ..Default::default()
-                };
-                Ok(wurbo::jinja::render(
-                    // The chosen template to update
-                    &output.template.unwrap().to_string(),
-                    templates,
-                    // Pass the whole Page context, as that is what the templates expect
-                    pcontext,
-                    // We're not registering any listeners here, so we can pass None
-                    None,
-                )?)
-            }
-        }
-    }
-
-    fn activate() {
-        let listeners = LISTENERS_MAP.lock().unwrap();
-        for (selector, (ty, outputid, template)) in listeners.iter() {
-            let deets = imports::ListenDetails {
-                selector: selector.to_string(),
-                ty: ty.to_string(),
-                outputid: outputid.to_string(),
-                template: template.to_string(),
-            };
-
-            imports::addeventlistener(&deets);
-        }
-    }
+// Macro builds the Component struct and implements the Guest trait for us
+reactivity_bindgen! {
+    WurboGuest,
+    Component,
+    WitContext,
+    imports
 }
 
 /// PageContext is the context with impl of StructObject

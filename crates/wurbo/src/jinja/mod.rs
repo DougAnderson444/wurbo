@@ -234,7 +234,12 @@ pub fn render(
 
 #[macro_export]
 macro_rules! reactivity_bindgen {
-    () => {
+    (
+        $guest: ident,
+        $component: ident,
+        $context:ident,
+        $imports:ident
+) => {
         use $crate::prelude::*;
 
         use std::collections::HashMap;
@@ -251,14 +256,9 @@ macro_rules! reactivity_bindgen {
         lazy_static! {
           // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
           static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
-          // is_initialized
-          static ref IS_INITIALIZED: RwLock<bool> = RwLock::new(false);
         }
 
-        /// The HTML element id of the output section so we can surgically render re-render it
-        static OUTPUT_ID: OnceLock<String> = OnceLock::new();
-
-        // unique namespace to clairfy and avoid collisions with other Guest code
+        /// unique namespace to clairfy and avoid collisions with other Guest code
         mod wurbo_tracker {
             /// Insert the source element id, event type, and target output id into the LISTENERS_MAP
             ///
@@ -266,7 +266,7 @@ macro_rules! reactivity_bindgen {
             ///
             /// ```rust
             /// let my_CSS_selector = "#some_selector";
-            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id");
+            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id", "my_template.html");
             /// ```
             pub fn track(
                 elem_id: String,
@@ -280,50 +280,61 @@ macro_rules! reactivity_bindgen {
             }
         }
 
-        // impl $guest for $component {
-        //     /// Say hello!
-        //     fn render(context: $context) -> String {
-        //         let name = &name;
-        //
-        //         if OUTPUT_ID.get().is_none() {
-        //             #[allow(clippy::redundant_closure)]
-        //             let id: &String = OUTPUT_ID.get_or_init(|| utils::rand_id());
-        //
-        //             // Call Render on the "page.html" template and return all HTML
-        //             let rendered = $crate::render("page.html", &$templates, context.into())
-        //                 .map_err(|e| format!("Error rendering page.html: {:?}", e))
-        //                 .unwrap();
-        //             rendered
-        //         } else {
-        //             // If OUTPUT_ID is set, render only the output section
-        //             // This is so we keep our INPUT event listeners which were set above
-        //             // Render and return only the output section of HTML
-        //             let rendered = $crate::render("output.html", &$templates, context.into())
-        //                 .map_err(|e| {
-        //                     format!(
-        //                         "Error rendering output.html: {:?} for context: {:?}",
-        //                         e, context
-        //                     )
-        //                 })
-        //                 .unwrap();
-        //             rendered
-        //         }
-        //     }
-        //
-        //     /// Activate the component listeners
-        //     fn activate() {
-        //         let listeners = LISTENERS_MAP.lock().unwrap();
-        //         for (selector, ty) in listeners.iter() {
-        //             let deets = $imports::ListenDetails {
-        //                 selector: selector.to_string(),
-        //                 ty: ty.to_string(),
-        //                 value: "TODO".to_string(),
-        //             };
-        //
-        //             $imports::addeventlistener(&deets);
-        //         }
-        //     }
-        // }
+        impl $guest for $component {
+            fn render(context: $context) -> Result<String, String> {
+                // TODO: pass in the templates to the macro.
+                let templates = get_templates();
+
+                println!("rendering ctx: {:?}", context);
+
+                match context {
+                    $context::Content(c) => {
+                        let page_context = PageContext::from(c);
+                        Ok(wurbo::jinja::render(
+                            templates.entry.name,
+                            templates,
+                            page_context,
+                            Some(wurbo_tracker::track),
+                        )?)
+                    }
+                    // for each other type of $context variant, follow the pattern below:
+                    $context::Output(o) => {
+                        let output = Output::from(o);
+                        // Build a PageContext with the given Output, as we need to pass an entire PageContext to the template
+                        // since the template uses "output.name", etc. this needs to be prepended. The
+                        // defaults are discarded in rendering since they don't apply to the output
+                        // template
+                        let pcontext = PageContext {
+                            output: output.clone(),
+                            ..Default::default()
+                        };
+                        Ok(wurbo::jinja::render(
+                            // The chosen template to update
+                            &output.template.unwrap().to_string(),
+                            templates,
+                            // Pass the whole Page context, as that is what the templates expect
+                            pcontext,
+                            // We're not registering any listeners here, so we can pass None
+                            None,
+                        )?)
+                    }
+                }
+            }
+
+            fn activate() {
+                let listeners = LISTENERS_MAP.lock().unwrap();
+                for (selector, (ty, outputid, template)) in listeners.iter() {
+                    let deets = $imports::ListenDetails {
+                        selector: selector.to_string(),
+                        ty: ty.to_string(),
+                        outputid: outputid.to_string(),
+                        template: template.to_string(),
+                    };
+
+                    $imports::addeventlistener(&deets);
+                }
+            }
+        }
     };
 }
 
