@@ -23,7 +23,7 @@ use minijinja::value::{StructObject, Value};
 use minijinja::Environment;
 
 /// Represents the context for the page
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize)]
 pub struct PageContext {
     page: Page,
     input: Input,
@@ -113,21 +113,127 @@ impl StructObject for PageContext {
 pub fn render(
     entry: &str,
     templates: &[(&str, &str)],
-    ctx_struct: PageContext,
+    // as long as ctx_struct implements StructObject, we can use it
+    ctx_struct: impl StructObject + 'static,
+    tracker: Option<fn(String, String) -> String>,
 ) -> Result<String, error::RenderError> {
+    println!("rendering: {}", entry);
+    println!("templates: {:?}", templates);
+    println!("tracker: {:?}", tracker);
+
     let mut env = Environment::new();
 
     templates.iter().for_each(|(name, template)| {
+        println!("adding template: {}", name);
         env.add_template(name, template)
             .expect("template should be added");
     });
 
+    println!("templates loaded");
+
+    if let Some(tracker) = tracker {
+        env.add_filter("on", tracker);
+    }
+
     let ctx = Value::from_struct_object(ctx_struct);
+
+    println!("loaded ctx: {:?}", ctx);
 
     let tmpl = env.get_template(entry)?;
 
     let rendered = tmpl.render(&ctx)?;
+    println!("rendered: {}", rendered);
     Ok(rendered)
+}
+
+#[macro_export]
+macro_rules! reactivity_bindgen {
+    () => {
+        use $crate::prelude::*;
+
+        use std::collections::HashMap;
+        use std::sync::Mutex;
+        use std::sync::OnceLock;
+        use std::sync::RwLock;
+
+        ///Maps the #elementId to the event type
+        type ListenerMap = HashMap<String, String>;
+
+        // We cannot have &self in the Component struct,
+        // so we use static variables to store the state between functions
+        // See https://crates.io/crates/lazy_static
+        lazy_static! {
+          // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
+          static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+          // is_initialized
+          static ref IS_INITIALIZED: RwLock<bool> = RwLock::new(false);
+        }
+
+        /// The HTML element id of the output section so we can surgically render re-render it
+        static OUTPUT_ID: OnceLock<String> = OnceLock::new();
+
+        // unique namespace to clairfy and avoid collisions with other Guest code
+        mod wurbo_tracker {
+            /// Insert the element id and event type into the LISTENERS_MAP
+            ///
+            /// # Example
+            ///
+            /// ```rust
+            /// let my_CSS_selector = "#some_selector";
+            /// Interactive::activate(format!("#{my_CSS_selector}"), "keyup");
+            /// ```
+            pub fn track(elem_id: String, ty: String) -> String {
+                let mut listeners = super::LISTENERS_MAP.lock().unwrap();
+                listeners.insert(format!("#{elem_id}"), ty);
+                elem_id
+            }
+        }
+
+        // impl $guest for $component {
+        //     /// Say hello!
+        //     fn render(context: $context) -> String {
+        //         let name = &name;
+        //
+        //         if OUTPUT_ID.get().is_none() {
+        //             #[allow(clippy::redundant_closure)]
+        //             let id: &String = OUTPUT_ID.get_or_init(|| utils::rand_id());
+        //
+        //             // Call Render on the "page.html" template and return all HTML
+        //             let rendered = $crate::render("page.html", &$templates, context.into())
+        //                 .map_err(|e| format!("Error rendering page.html: {:?}", e))
+        //                 .unwrap();
+        //             rendered
+        //         } else {
+        //             // If OUTPUT_ID is set, render only the output section
+        //             // This is so we keep our INPUT event listeners which were set above
+        //             // Render and return only the output section of HTML
+        //             let rendered = $crate::render("output.html", &$templates, context.into())
+        //                 .map_err(|e| {
+        //                     format!(
+        //                         "Error rendering output.html: {:?} for context: {:?}",
+        //                         e, context
+        //                     )
+        //                 })
+        //                 .unwrap();
+        //             rendered
+        //         }
+        //     }
+        //
+        //     /// Activate the component listeners
+        //     fn activate() {
+        //         let listeners = LISTENERS_MAP.lock().unwrap();
+        //         for (selector, ty) in listeners.iter() {
+        //             let deets = $imports::ListenDetails {
+        //                 selector: selector.to_string(),
+        //                 ty: ty.to_string(),
+        //                 value: "TODO".to_string(),
+        //             };
+        //
+        //             $imports::addeventlistener(&deets);
+        //         }
+        //     }
+        // }
+    };
 }
 
 #[cfg(test)]
@@ -136,7 +242,7 @@ mod jinja_unit_tests {
     use std::path::PathBuf;
 
     #[test]
-    fn smoke() -> Result<(), String> {
+    fn smoke() -> Result<(), Box<dyn std::error::Error>> {
         let ctx_struct = PageContext {
             page: Page {
                 title: "Let's count vowels using templates for Inputs and Outputs!".to_string(),
@@ -158,31 +264,21 @@ mod jinja_unit_tests {
         tmpls.push(("input.html", include_str!("fixtures/input.html")));
         tmpls.push(("output.html", include_str!("fixtures/output.html")));
 
-        let rendered_page = render("page.html", &tmpls, ctx_struct).expect("test should pass");
+        // mock tracker
+        fn tracker(_elem_id: String, _ty: String) {}
+
+        let rendered_page =
+            render("page.html", &tmpls, ctx_struct.clone(), tracker).expect("test should pass");
 
         eprintln!("rendered_page:\n{}", rendered_page);
 
         // write rendered_page to file
         std::fs::write(path.join("rendered_page.html"), rendered_page)?;
 
-        eprintln!("\n\nNow, let's render just the Output \n\n");
-
-        let output_ctx = PageContext {
-            page: Page {
-                title: "Let's count vowels using templates for Inputs and Outputs!".to_string(),
-            },
-            input: Input {
-                placeholder: "Input the word with vowels here".to_string(),
-            },
-            output: Output {
-                name: "vowels".to_string(),
-            },
-        };
-
-        let output_tmpls = vec![("output.html", include_str!("fixtures/output.html"))];
+        eprintln!("\nNow, let's render just the Output \n");
 
         let rendered_output =
-            render("output.html", &output_tmpls, output_ctx).expect("test should pass");
+            render("output.html", &tmpls, ctx_struct, tracker).expect("test should pass");
 
         eprintln!("OUTPUT ONLY:\n{}", rendered_output);
 

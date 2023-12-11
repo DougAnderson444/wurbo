@@ -6,10 +6,37 @@ interface types {
   record listen-details {
     selector: string,
     ty: string,
-    value: string
+    outputid: string
+  }
+
+  // Context for the minijinja rendering
+  record page {
+    title: string
+  }
+
+  record input {
+    placeholder: string
+  }
+
+  record output {
+    name: string,
+    // optional id string: None is intial render, Some for update value
+    id: option<string>
+  }
+
+  record context {
+    page: page,
+    input: input,
+    output: output
   }
 
 }
+
+// interface core {
+//
+//   // Core functionality
+//   calculate: func(input: string) -> string;
+// }
 
 interface imports {
 
@@ -24,8 +51,11 @@ interface imports {
 }
 
 interface reactivity {
+
+  use types.{context};
+
   // renders the initial Web component with the given data
-  render: func(name: string) -> string;
+  render: func(ctx: context) -> string;
 
   // activate listening 
   activate: func();

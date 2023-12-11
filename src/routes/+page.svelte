@@ -34,7 +34,12 @@
 		mod = await load(wasmBytes, importables);
 
 		// call `render` with your inputs for the component
-		renderedHTML = mod.reactivity.render('World');
+		let data = {
+			page: { title: "Let's count vowels using templates for Inputs and Outputs!" },
+			input: { placeholder: "Input the word with vowels it's here" },
+			output: { name: 'vowels' }
+		};
+		renderedHTML = mod.reactivity.render(data);
 
 		// lisen for events from the component
 		wurbo.listen(mod);
