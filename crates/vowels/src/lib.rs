@@ -5,6 +5,10 @@ cargo_component_bindings::generate!();
 
 use minijinja::value::StructObject;
 use minijinja::Value;
+use wurbo::jinja::Entry;
+use wurbo::jinja::Index;
+use wurbo::jinja::Rest;
+use wurbo::jinja::Templates;
 use wurbo::reactivity_bindgen;
 
 // mod components;
@@ -35,11 +39,14 @@ struct Component;
 //  // other Guest functions can go here as required.
 // }
 
-fn get_templates() -> Vec<(&'static str, &'static str)> {
-    let mut templates = Vec::new();
-    templates.push(("page.html", include_str!("templates/page.html")));
-    templates.push(("input.html", include_str!("templates/input.html")));
-    templates.push(("output.html", include_str!("templates/output.html")));
+fn get_templates() -> Templates {
+    let templates = Templates::new(
+        Index::new("page.html", include_str!("templates/page.html")),
+        Rest::new(vec![
+            Entry::new("input.html", include_str!("templates/input.html")),
+            Entry::new("output.html", include_str!("templates/output.html")),
+        ]),
+    );
     templates
 }
 
@@ -49,12 +56,14 @@ impl reactivity::Guest for Component {
     fn render(context: types::Context) -> Result<String, String> {
         let templates = get_templates();
 
+        println!("rendering ctx: {:?}", context);
+
         match context {
             types::Context::Content(c) => {
                 let page_context = PageContext::from(c);
                 Ok(wurbo::jinja::render(
-                    "page.html",
-                    &templates,
+                    templates.entry.name,
+                    templates,
                     page_context,
                     Some(wurbo_tracker::track),
                 )?)
@@ -70,9 +79,12 @@ impl reactivity::Guest for Component {
                     ..Default::default()
                 };
                 Ok(wurbo::jinja::render(
-                    "output.html",
-                    &templates,
+                    // The chosen template to update
+                    &output.template.unwrap().to_string(),
+                    templates,
+                    // Pass the whole Page context, as that is what the templates expect
                     pcontext,
+                    // We're not registering any listeners here, so we can pass None
                     None,
                 )?)
             }
@@ -81,11 +93,12 @@ impl reactivity::Guest for Component {
 
     fn activate() {
         let listeners = LISTENERS_MAP.lock().unwrap();
-        for (selector, (ty, outputid)) in listeners.iter() {
+        for (selector, (ty, outputid, template)) in listeners.iter() {
             let deets = imports::ListenDetails {
                 selector: selector.to_string(),
                 ty: ty.to_string(),
                 outputid: outputid.to_string(),
+                template: template.to_string(),
             };
 
             imports::addeventlistener(&deets);
@@ -128,6 +141,7 @@ impl From<types::Content> for PageContext {
             output: Output {
                 name: context.output.name,
                 id: context.output.id,
+                template: context.output.template,
             },
         }
     }
@@ -178,6 +192,7 @@ impl StructObject for Input {
 struct Output {
     name: String,
     id: Option<String>,
+    template: Option<String>,
 }
 
 impl Output {
@@ -208,6 +223,7 @@ impl From<types::Output> for Output {
         Output {
             name: context.name,
             id: context.id,
+            template: context.template,
         }
     }
 }

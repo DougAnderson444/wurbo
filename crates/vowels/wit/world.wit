@@ -6,7 +6,8 @@ interface types {
   record listen-details {
     selector: string,
     ty: string,
-    outputid: string
+    outputid: string,
+    template: string
   }
 
   // Context for the minijinja rendering
@@ -21,7 +22,8 @@ interface types {
   record output {
     name: string,
     // optional id string: None is intial render, Some for update value
-    id: option<string>
+    id: option<string>,
+    template: option<string>
   }
 
   // COntent for the entire page

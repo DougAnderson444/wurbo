@@ -15,6 +15,8 @@
 //! - macros: to write reusable template functions `{% macro input(name, id) %}...{% endmacro %}`
 //! - inheritance: to extend templates (templates within templates) `{% extends "base.html" %}`
 //! - include: to include templates (templates within templates) `{% include "header.html" %}`
+use std::ops::Deref;
+
 use crate::utils;
 mod count;
 mod error;
@@ -110,19 +112,100 @@ impl StructObject for PageContext {
     }
 }
 
+/// This struct and it's impls replaces the templates Vec with a type that identifies an Entry
+/// tuple,
+pub struct Templates {
+    pub entry: Entry,
+    pub rest: Vec<Entry>,
+}
+
+impl Templates {
+    pub fn new(entry: Index, rest: Rest) -> Self {
+        Self {
+            entry: entry.0,
+            rest: rest.0,
+        }
+    }
+}
+
+pub struct Index(Entry);
+
+impl Index {
+    pub fn new(name: &'static str, template: &'static str) -> Self {
+        Self(Entry::new(name, template))
+    }
+}
+
+impl Deref for Index {
+    type Target = Entry;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub struct Rest(Vec<Entry>);
+
+impl Rest {
+    pub fn new(vals: Vec<Entry>) -> Self {
+        Self(vals)
+    }
+
+    pub fn push(&mut self, entry: Entry) {
+        self.0.push(entry);
+    }
+}
+
+impl Deref for Rest {
+    type Target = Vec<Entry>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub struct Entry {
+    pub name: &'static str,
+    pub template: &'static str,
+}
+
+impl Entry {
+    pub fn new(name: &'static str, template: &'static str) -> Self {
+        Self { name, template }
+    }
+}
+
+/// Impl IntoIterator for Templates
+impl IntoIterator for Templates {
+    type Item = (&'static str, &'static str);
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut v = Vec::new();
+        v.push((self.entry.name, self.entry.template));
+        for e in self.rest {
+            v.push((e.name, e.template));
+        }
+        v.into_iter()
+    }
+}
+
+/// Render the given entry filename with the given templates using the context
+/// Trackers will register any event listeners as per the templates' `on` attributes
 pub fn render(
     entry: &str,
-    templates: &[(&str, &str)],
+    // The chosen template to update
+    templates: Templates,
     // as long as ctx_struct implements StructObject, we can use it
     ctx_struct: impl StructObject + 'static,
-    tracker: Option<fn(String, String, String) -> String>,
+    tracker: Option<fn(String, String, String, String) -> String>,
 ) -> Result<String, error::RenderError> {
     let mut env = Environment::new();
 
-    templates.iter().for_each(|(name, template)| {
+    for (name, template) in templates.into_iter() {
         env.add_template(name, template)
             .expect("template should be added");
-    });
+    }
 
     if let Some(tracker) = tracker {
         env.add_filter("on", tracker);
@@ -160,7 +243,7 @@ macro_rules! reactivity_bindgen {
         use std::sync::RwLock;
 
         ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, (String, String)>;
+        type ListenerMap = HashMap<String, (String, String, String)>;
 
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
@@ -185,9 +268,14 @@ macro_rules! reactivity_bindgen {
             /// let my_CSS_selector = "#some_selector";
             /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id");
             /// ```
-            pub fn track(elem_id: String, ty: String, outputid: String) -> String {
+            pub fn track(
+                elem_id: String,
+                ty: String,
+                outputid: String,
+                template: String,
+            ) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
-                listeners.insert(format!("#{elem_id}"), (ty, outputid));
+                listeners.insert(format!("#{elem_id}"), (ty, outputid, template));
                 elem_id
             }
         }
