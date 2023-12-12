@@ -26,7 +26,7 @@ export function addeventlistener({ selector, ty, outputid, template }) {
 		let output_ctx = {
 			tag: 'output',
 			val: {
-				name: e.target.value,
+				value: e.target.value,
 				id: outputid,
 				template
 			}

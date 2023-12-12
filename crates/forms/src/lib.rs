@@ -1,40 +1,20 @@
-// the render crate needs braces to work
-// #![allow(unused_braces)]
-
 cargo_component_bindings::generate!();
 
-use wurbo::jinja::Entry;
-use wurbo::jinja::Index;
-use wurbo::jinja::Rest;
-use wurbo::jinja::Templates;
+use bindings::demo::forms::{
+    types::{self, Context as WitContext},
+    wurbo_in,
+};
+use bindings::exports::demo::forms::wurbo_out::Guest as WurboGuest;
+use wurbo::jinja::{Entry, Index, Rest, Templates};
 use wurbo::reactivity_bindgen;
 
-// mod components;
-// mod input;
-// mod output;
-mod count;
-mod utils;
-
-// use components::page::Page;
-// use input::Input;
-// use output::Output;
-
-use crate::bindings::demo::vowels::types::{self, Context as WitContext};
-use crate::bindings::demo::vowels::wurbo_in;
-use crate::bindings::exports::demo::vowels::wurbo_out::Guest as WurboGuest;
-
-/// The WIT Component struct for implementing the Guest trait
 struct Component;
-
-// impl Guest for Component {
-//  // other Guest functions can go here as required.
-// }
 
 /// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
         Index::new("page.html", include_str!("templates/page.html")),
-        Entry::new("output.html", include_str!("templates/output.html")),
+        Entry::new("form-output.html", include_str!("templates/output.html")),
         Rest::new(vec![Entry::new(
             "input.html",
             include_str!("templates/input.html"),
@@ -142,12 +122,16 @@ struct Output {
 
 impl Output {
     fn calculate(&self) -> Value {
-        Value::from(count::count_vowels(&self.value))
+        const VOWELS: &[char] = &['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'];
+
+        pub fn count_vowels(s: &str) -> usize {
+            s.chars().filter(|c| VOWELS.contains(c)).count()
+        }
+
+        Value::from(count_vowels(&self.value))
     }
 }
 
-/// This is where the magic happens. Calling `render` executes `get_field` which will take the
-/// value as input and generate a new `count` which is then displayed in the `template`.
 impl StructObject for Output {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
@@ -161,7 +145,7 @@ impl StructObject for Output {
 
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["name", "count", "id"])
+        Some(&["value", "count", "id"])
     }
 }
 

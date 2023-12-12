@@ -1,4 +1,4 @@
-package demo:vowels;
+package demo:forms;
 
 interface types {
 
@@ -23,6 +23,7 @@ interface types {
     value: string,
     // optional id string: None is intial render, Some for update value
     id: option<string>,
+    // tell the render function what the name of the template is. Defaults to "output.html"
     template: option<string>
   }
 
@@ -51,15 +52,12 @@ interface wurbo-in {
 
   use types.{listen-details};
 
-  // print to the console
-  prnt: func(msg: string);
-
   // Add an event listener to the given element
   addeventlistener: func(details: listen-details);
 
 }
 
-interface wurbo-out  {
+interface wurbo-out {
 
   use types.{context};
 

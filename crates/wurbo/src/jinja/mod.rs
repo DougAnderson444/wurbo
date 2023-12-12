@@ -116,13 +116,15 @@ impl StructObject for PageContext {
 /// tuple,
 pub struct Templates {
     pub entry: Entry,
+    pub output: Entry,
     pub rest: Vec<Entry>,
 }
 
 impl Templates {
-    pub fn new(entry: Index, rest: Rest) -> Self {
+    pub fn new(entry: Index, output: Entry, rest: Rest) -> Self {
         Self {
             entry: entry.0,
+            output: output,
             rest: rest.0,
         }
     }
@@ -183,6 +185,7 @@ impl IntoIterator for Templates {
     fn into_iter(self) -> Self::IntoIter {
         let mut v = Vec::new();
         v.push((self.entry.name, self.entry.template));
+        v.push((self.output.name, self.output.template));
         for e in self.rest {
             v.push((e.name, e.template));
         }
@@ -271,10 +274,13 @@ macro_rules! reactivity_bindgen {
             pub fn track(
                 elem_id: String,
                 ty: String,
-                outputid: String,
+                outputid: String, // CSS selector of output element
                 template: String,
             ) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
+                // This is how you specify a selector that is the id_child of the parent with
+                // id_parent:
+                // let selector = format!("#{} #{}", id_parent, id_child);
                 listeners.insert(format!("#{elem_id}"), (ty, outputid, template));
                 elem_id
             }
@@ -310,7 +316,7 @@ macro_rules! reactivity_bindgen {
                         };
                         Ok(wurbo::jinja::render(
                             // The chosen template to update
-                            &output.template.unwrap().to_string(),
+                            &output.template.unwrap_or(templates.output.name.to_string()),
                             templates,
                             // Pass the whole Page context, as that is what the templates expect
                             pcontext,

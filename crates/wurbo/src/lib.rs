@@ -10,6 +10,8 @@ pub mod utils;
 pub mod prelude {
     pub use crate::utils;
     pub use lazy_static::lazy_static;
+    pub use minijinja::value::{StructObject, Value};
+    // TODO: Remove render crate from repo
     pub use render::{
         // A macro to create components
         component,

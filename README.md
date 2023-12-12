@@ -23,7 +23,8 @@ The example is demonstrated at [https://douganderson444.github.io/wurbo](https:/
 - declare interface named `reactivity` with functions `render` and `activate`
 - a separate interface (named anything you like, such as `imports`) with function `addeventlistener`
 
-2. In the Rust: 
+2. In the Rust:
+- create your new [Wasm Component](https://github.com/bytecodealliance/cargo-component) using `cargo component new --reactor <name>`
 - ensure you add [`render` crate](https://crates.io/crates/render) to your `Cargo.toml` dependencies
 - `use` the `wurbo` crate's macro to implement the `reactivity` interface for `reactivity::Guest`. 
 - build your own `Page` parent component and `Input` / `Output` components as you like for your user interface.

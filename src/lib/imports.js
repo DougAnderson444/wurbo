@@ -11,6 +11,14 @@ export function addeventlistener({ selector, ty, value }) {
 		// This code gets bundled into the main bundle, but there's no way for us
 		// to reference `render` directly. But we can access the window object
 		// which ensures we are using the same function. , we post a message to the parent window
-		bc.postMessage(window.wurbo.render(e.target.value));
+		let output_ctx = {
+			tag: 'output',
+			val: {
+				value: e.target.value,
+				selector: outputid,
+				template
+			}
+		};
+		bc.postMessage(window[GLOBAL_NAMESPACE].render(output_ctx));
 	});
 }
