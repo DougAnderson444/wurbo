@@ -6,7 +6,7 @@
 	import wasmURL from '../../../../target/wasm32-wasi/release/vowels.wasm?url';
 
 	// get imports from +page.svelte
-	export let importableCode;
+	export let buildCodeString;
 	export let load;
 
 	/**
@@ -27,7 +27,7 @@
 
 		let listener = new wurbo.Listener();
 
-		importableCode = `
+		let importableCode = `
       export function addeventlistener({ selector, ty, outputid, template }) {
         const bc = new BroadcastChannel('listener_updates');
         document.querySelector(selector).addEventListener(ty, (e) => {
@@ -46,7 +46,7 @@
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
 		// define the import handles you are giving to your component
-		let importables = [{ 'demo:vowels/wurbo-in': importableCode }];
+		let importables = [{ 'demo:vowels/wurbo-in': buildCodeString(listener.namespace) }];
 
 		// load the import handles into the Wasm component and get the ES module returned
 		mod = await load(wasmBytes, importables);

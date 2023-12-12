@@ -6,6 +6,8 @@
 	// get imports as a string
 	import importableCode from './importables.js?raw';
 
+	import { buildCodeString } from './importables.js';
+
 	let load;
 
 	onMount(async () => {
@@ -19,7 +21,7 @@
 	{#if load}
 		{#each examples.default as example}
 			<div>
-				<svelte:component this={example} {load} {importableCode} />
+				<svelte:component this={example} {load} {buildCodeString} />
 			</div>
 		{/each}
 	{/if}

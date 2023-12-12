@@ -36,3 +36,20 @@ export function addeventlistener({ selector, ty, outputid, template }) {
 		// bc.postMessage(window[GLOBAL_NAMESPACE].render(e.target.value));
 	});
 }
+
+export function buildCodeString(namespace) {
+	return `
+      export function addeventlistener({ selector, ty, outputid, template }) {
+        const bc = new BroadcastChannel('listener_updates');
+        document.querySelector(selector).addEventListener(ty, (e) => {
+          bc.postMessage(window.${namespace}.render({
+            tag: 'output',
+            val: {
+              value: e.target.value,
+              id: outputid,
+              template
+            }
+          }));
+        });
+      }`;
+}
