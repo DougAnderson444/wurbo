@@ -28,7 +28,7 @@ fn get_templates() -> Templates {
 }
 
 // Macro builds the Component struct and implements the Guest trait for us, saving copy-and-paste
-prelude_bindgen! {WurboGuest, Component, Context}
+prelude_bindgen! {WurboGuest, Component, PageContext, Context}
 
 /// PageContext is a struct of other structs that implement [StructObject],
 /// which is why it is not a Newtype wrapper like the others are.

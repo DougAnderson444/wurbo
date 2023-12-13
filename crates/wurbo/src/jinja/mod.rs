@@ -145,11 +145,20 @@ pub fn render(
     };
     Ok(rendered)
 }
+
+/// Implements the wurbo_out::Guest trait for the given component.
+///
+/// You must have a `PageContext` struct that implements StructObject in the same file where you use
+/// this macro.
+///
+/// This macro also creates and makes available a `LAST_STATE` static variable
+/// that stores the last [PageContext] that was rendered.
 #[macro_export]
 macro_rules! prelude_bindgen {
     ( 
         $guest: ident,
         $component: ident,
+        $pagecontext: ident,
         $context:ident
 ) => {
         use $crate::prelude::*;
@@ -166,8 +175,8 @@ macro_rules! prelude_bindgen {
         lazy_static! {
         // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
         static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
-        // cache the last state of PageContext as Mutex
-        static ref LAST_STATE: Mutex<Option<PageContext>> = Mutex::new(None);
+        // cache the last state of $pagecontext as Mutex
+        static ref LAST_STATE: Mutex<Option<$pagecontext>> = Mutex::new(None);
         }
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
@@ -194,7 +203,7 @@ macro_rules! prelude_bindgen {
             fn render(context: $context) -> Result<String, String> {
                 // TODO: pass in the templates to the macro.
                 let templates = get_templates();
-                let page_context = PageContext::from(&context);
+                let page_context = $pagecontext::from(&context);
                 // update cache
                 let mut last_state = LAST_STATE.lock().unwrap();
                 *last_state = Some(page_context.clone());
