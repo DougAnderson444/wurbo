@@ -127,8 +127,6 @@ pub fn render(
 
     let ctx = Value::from_struct_object(ctx_struct);
 
-    println!("trns ctx: {:?}", ctx);
-
     let tmpl = env.get_template(entry)?;
 
     let rendered = match tmpl.render(&ctx) {
