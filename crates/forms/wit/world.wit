@@ -6,7 +6,6 @@ interface types {
   record listen-details {
     selector: string,
     ty: string,
-    template: string
   }
 
   // Context for the minijinja rendering

@@ -14,8 +14,7 @@ export function addeventlistener({ selector, ty, value }) {
 		let output_ctx = {
 			tag: 'output',
 			val: {
-				value: e.target.value,
-				template
+				value: e.target.value
 			}
 		};
 		bc.postMessage(window[GLOBAL_NAMESPACE].render(output_ctx));

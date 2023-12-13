@@ -112,7 +112,7 @@ pub fn render(
     templates: Templates,
     // as long as ctx_struct implements StructObject, we can use it
     ctx_struct: impl StructObject + 'static,
-    tracker: Option<fn(String, String, String) -> String>,
+    tracker: fn(String, String) -> String,
 ) -> Result<String, error::RenderError> {
     let mut env = Environment::new();
 
@@ -121,9 +121,7 @@ pub fn render(
             .expect("template should be added");
     }
 
-    if let Some(tracker) = tracker {
-        env.add_filter("on", tracker);
-    }
+    env.add_filter("on", tracker);
 
     let ctx = Value::from_struct_object(ctx_struct);
 
@@ -167,7 +165,7 @@ macro_rules! prelude_bindgen {
         use std::sync::Mutex;
 
         ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, (String, String)>;
+        type ListenerMap = HashMap<String, String>;
 
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
@@ -187,14 +185,14 @@ macro_rules! prelude_bindgen {
             ///
             /// ```rust
             /// let my_CSS_selector = "#some_selector";
-            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id", "my_template.html");
+            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup");
             /// ```
-            pub fn track(elem_id: String, ty: String, template: String) -> String {
+            pub fn track(elem_id: String, ty: String) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
                 // This is how you specify a selector that is the id_child of the parent with
                 // id_parent:
                 // let selector = format!("#{} #{}", id_parent, id_child);
-                listeners.insert(format!("#{elem_id}"), (ty, template));
+                listeners.insert(format!("#{elem_id}"), ty);
                 elem_id
             }
         }
@@ -217,17 +215,16 @@ macro_rules! prelude_bindgen {
                     entry,
                     templates,
                     page_context,
-                    Some(wurbo_tracker::track),
+                    wurbo_tracker::track,
                 )?)
             }
 
             fn activate() {
                 let listeners = LISTENERS_MAP.lock().unwrap();
-                for (selector, (ty, template)) in listeners.iter() {
+                for (selector, ty) in listeners.iter() {
                     let deets = wurbo_in::ListenDetails {
                         selector: selector.to_string(),
                         ty: ty.to_string(),
-                        template: template.to_string(),
                     };
 
                     wurbo_in::addeventlistener(&deets);
