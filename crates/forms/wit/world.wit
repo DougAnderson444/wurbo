@@ -6,7 +6,6 @@ interface types {
   record listen-details {
     selector: string,
     ty: string,
-    outputid: string,
     template: string
   }
 
@@ -18,13 +17,22 @@ interface types {
   record input {
     placeholder: string
   }
+  record outrecord {
+    value: string,
+    // optional id string: None is intial render, Some for update value
+    id: option<string>,
+    // tell the render function what the name of the template is. Defaults to "output.html"
+    template: option<string>
+  }
 
   record output {
     value: string,
     // optional id string: None is intial render, Some for update value
     id: option<string>,
     // tell the render function what the name of the template is. Defaults to "output.html"
-    template: option<string>
+    template: option<string>,
+    // the output dest for the username changes
+    username: outrecord,
   }
 
   // COntent for the entire page
@@ -37,6 +45,7 @@ interface types {
   // Context variants
   variant context {
     content(content),
+    username(outrecord),
     output(output)
   }
 

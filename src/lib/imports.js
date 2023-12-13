@@ -15,7 +15,6 @@ export function addeventlistener({ selector, ty, value }) {
 			tag: 'output',
 			val: {
 				value: e.target.value,
-				selector: outputid,
 				template
 			}
 		};

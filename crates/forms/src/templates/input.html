@@ -2,13 +2,19 @@
 	<div class="italic font-semibold">
 		The data you enter can't be seen by anyone else, since it's in a WebAssembly sandbox. =)
 	</div>
-	<!-- when keyup fires, send this target.value to id="myoutputid" for rendering -->
-	<input
-		id="{{ input.id|on('keyup', 'myoutputid', 'form-output.html') }}"
-		class="rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"
-		placeholder="{{input.placeholder}}"
-	/>
-	<div class="italic font-semibold">
-		"But it can still calculate how many vowels are in your words for you!"
+	<!-- when keyup fires, send this target.value to the template as a prop for rendering -->
+
+	<div class="flex">
+		<div class="flex-1">
+			<div class="flex-1">Username:</div>
+			<div class="flex-1">
+				<input
+					id="{{ input.username_input|on('keyup', 'username.html') }}"
+					name="username"
+					class="rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"
+					placeholder="{{input.placeholder}}"
+				/>
+			</div>
+		</div>
 	</div>
 </div>

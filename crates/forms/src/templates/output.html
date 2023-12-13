@@ -1,6 +1,9 @@
-<div id="myoutputid" class="border-2 border-dashed border-green-500 p-4 rounded my-4">
-	<b>{{output.value}}</b>
-	{% if output.count == 0 %} has no vowels. {% elif output.count == 1 %} has 1 vowel. {% else %} has
-	{{output.count}} vowels. {% endif %}
-	<br />
+<div id="myoutput">
+	<div>{% include "username.html" %}</div>
+	<div>Output value: {{output.value}}</div>
+	<div>Output count: {{output.count}}</div>
+	<div>
+		The length is: {% if output.count == 0 %} has no length. {% elif output.count == 1 %} has 1
+		char. {% else %} has {{output.count}} charss. {% endif %} <br />
+	</div>
 </div>

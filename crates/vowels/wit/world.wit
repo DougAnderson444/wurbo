@@ -6,7 +6,6 @@ interface types {
   record listen-details {
     selector: string,
     ty: string,
-    outputid: string,
     template: string
   }
 

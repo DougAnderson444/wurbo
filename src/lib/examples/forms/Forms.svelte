@@ -27,21 +27,6 @@
 
 		let listener = new wurbo.Listener();
 
-		let importableCode = `
-      export function addeventlistener({ selector, ty, outputid, template }) {
-        const bc = new BroadcastChannel('listener_updates');
-        document.querySelector(selector).addEventListener(ty, (e) => {
-          bc.postMessage(window.${listener.namespace}.render({
-            tag: 'output',
-            val: {
-              value: e.target.value,
-              id: outputid,
-              template
-            }
-          }));
-        });
-      }`;
-
 		// get your wasm bytes from your storage source
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
@@ -56,8 +41,8 @@
 			tag: 'content',
 			val: {
 				page: { title: "Let's process the contents of a form." },
-				input: { placeholder: "Input the word with forms it's here" },
-				output: { value: 'forms' }
+				input: { placeholder: 'Enter a Username here' },
+				output: { value: 'forms', username: { value: '' } }
 			}
 		};
 		renderedHTML = mod.wurboOut.render(data);

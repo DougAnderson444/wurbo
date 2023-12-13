@@ -4,7 +4,8 @@
 	</div>
 	<!-- when keyup fires, send this target.value to or rendering -->
 	<input
-		id="{{ input.id|on('keyup', 'myoutputcount', 'output.html') }}"
+		id="{{ input.id|on('keyup', 'output.html') }}"
+		name="output"
 		class="rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"
 		placeholder="{{input.placeholder}}"
 	/>

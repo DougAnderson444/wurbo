@@ -1,3 +1,5 @@
+<!-- the risk here is the the id may not be unique. But generating an init ID is a bit complex -->
+<!-- TODO: Persist a randomly generated outout ID on the minijinja side -->
 <div id="myoutputcount" class="border-2 border-dashed border-green-500 p-4 rounded my-4">
 	<b>{{output.value}}</b>
 	{% if output.count == 0 %} has no vowels. {% elif output.count == 1 %} has 1 vowel. {% else %} has

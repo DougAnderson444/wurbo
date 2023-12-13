@@ -17,100 +17,11 @@
 //! - include: to include templates (templates within templates) `{% include "header.html" %}`
 use std::ops::Deref;
 
-use crate::utils;
-mod count;
 mod error;
 
-use minijinja::value::{StructObject, Value};
+use minijinja::value::StructObject;
 use minijinja::Environment;
-
-/// Represents the context for the page
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
-pub struct PageContext {
-    page: Page,
-    input: Input,
-    output: Output,
-}
-
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
-struct Page {
-    title: String,
-}
-
-impl StructObject for Page {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "title" => Some(Value::from(self.title.clone())),
-            "id" => Some(Value::from(utils::rand_id())),
-            _ => None,
-        }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
-    }
-}
-
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
-struct Input {
-    placeholder: String,
-}
-
-impl StructObject for Input {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "placeholder" => Some(Value::from(self.placeholder.clone())),
-            "id" => Some(Value::from(utils::rand_id())),
-            _ => None,
-        }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["placeholder", "id"])
-    }
-}
-
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
-struct Output {
-    name: String,
-}
-
-impl Output {
-    fn calculate(&self) -> Value {
-        Value::from(count::count_vowels(&self.name))
-    }
-}
-
-impl StructObject for Output {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "name" => Some(Value::from(self.name.clone())),
-            "count" => Some(Value::from(self.calculate())),
-            "id" => Some(Value::from(utils::rand_id())),
-            _ => None,
-        }
-    }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["name", "count", "id"])
-    }
-}
-
-impl StructObject for PageContext {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "page" => Some(Value::from_struct_object(self.page.clone())),
-            "input" => Some(Value::from_struct_object(self.input.clone())),
-            "output" => Some(Value::from_struct_object(self.output.clone())),
-            _ => None,
-        }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
-    }
-}
+use minijinja::Value;
 
 /// This struct and it's impls replaces the templates Vec with a type that identifies an Entry
 /// tuple,
@@ -201,7 +112,7 @@ pub fn render(
     templates: Templates,
     // as long as ctx_struct implements StructObject, we can use it
     ctx_struct: impl StructObject + 'static,
-    tracker: Option<fn(String, String, String, String) -> String>,
+    tracker: Option<fn(String, String, String) -> String>,
 ) -> Result<String, error::RenderError> {
     let mut env = Environment::new();
 
@@ -215,6 +126,8 @@ pub fn render(
     }
 
     let ctx = Value::from_struct_object(ctx_struct);
+
+    println!("trns ctx: {:?}", ctx);
 
     let tmpl = env.get_template(entry)?;
 
@@ -234,6 +147,48 @@ pub fn render(
     };
     Ok(rendered)
 }
+#[macro_export]
+macro_rules! prelude_bindgen {
+    () => {
+        use $crate::prelude::*;
+
+        use std::collections::HashMap;
+        use std::sync::Mutex;
+
+        ///Maps the #elementId to the event type
+        type ListenerMap = HashMap<String, (String, String)>;
+
+        // We cannot have &self in the Component struct,
+        // so we use static variables to store the state between functions
+        // See https://crates.io/crates/lazy_static
+        lazy_static! {
+        // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
+        static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+        // cache the last state of PageContext as Mutex
+        static ref LAST_STATE: Mutex<PageContext> = Mutex::new(PageContext::default());
+        }
+
+        /// unique namespace to clairfy and avoid collisions with other Guest code
+        mod wurbo_tracker {
+            /// Insert the source element id, event type, and target output id into the LISTENERS_MAP
+            ///
+            /// # Example
+            ///
+            /// ```rust
+            /// let my_CSS_selector = "#some_selector";
+            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id", "my_template.html");
+            /// ```
+            pub fn track(elem_id: String, ty: String, template: String) -> String {
+                let mut listeners = super::LISTENERS_MAP.lock().unwrap();
+                // This is how you specify a selector that is the id_child of the parent with
+                // id_parent:
+                // let selector = format!("#{} #{}", id_parent, id_child);
+                listeners.insert(format!("#{elem_id}"), (ty, template));
+                elem_id
+            }
+        }
+    };
+}
 
 #[macro_export]
 macro_rules! reactivity_bindgen {
@@ -247,18 +202,18 @@ macro_rules! reactivity_bindgen {
 
         use std::collections::HashMap;
         use std::sync::Mutex;
-        use std::sync::OnceLock;
-        use std::sync::RwLock;
 
         ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, (String, String, String)>;
+        type ListenerMap = HashMap<String, (String, String)>;
 
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
         // See https://crates.io/crates/lazy_static
         lazy_static! {
-          // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
-          static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+        // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
+        static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+        // cache the last state of PageContext as Mutex
+        static ref LAST_STATE: Mutex<PageContext> = Mutex::new(PageContext::default());
         }
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
@@ -271,17 +226,12 @@ macro_rules! reactivity_bindgen {
             /// let my_CSS_selector = "#some_selector";
             /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id", "my_template.html");
             /// ```
-            pub fn track(
-                elem_id: String,
-                ty: String,
-                outputid: String, // CSS selector of output element
-                template: String,
-            ) -> String {
+            pub fn track(elem_id: String, ty: String, template: String) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
                 // This is how you specify a selector that is the id_child of the parent with
                 // id_parent:
                 // let selector = format!("#{} #{}", id_parent, id_child);
-                listeners.insert(format!("#{elem_id}"), (ty, outputid, template));
+                listeners.insert(format!("#{elem_id}"), (ty, template));
                 elem_id
             }
         }
@@ -296,6 +246,10 @@ macro_rules! reactivity_bindgen {
                 match context {
                     $context::Content(c) => {
                         let page_context = PageContext::from(c);
+                        // update cache
+                        let mut last_state = LAST_STATE.lock().unwrap();
+                        *last_state = page_context.clone();
+
                         Ok(wurbo::jinja::render(
                             templates.entry.name,
                             templates,
@@ -310,16 +264,22 @@ macro_rules! reactivity_bindgen {
                         // since the template uses "output.name", etc. this needs to be prepended. The
                         // defaults are discarded in rendering since they don't apply to the output
                         // template
-                        let pcontext = PageContext {
+                        // merge context updates with current state
+                        let page_context = PageContext {
                             output: output.clone(),
-                            ..Default::default()
+                            ..LAST_STATE.lock().unwrap().clone()
                         };
+                        // update cache to pcontext
+                        let mut last_state = LAST_STATE.lock().unwrap();
+                        *last_state = page_context.clone();
+
                         Ok(wurbo::jinja::render(
                             // The chosen template to update
                             &output.template.unwrap_or(templates.output.name.to_string()),
+                            // Pass all the template for reference
                             templates,
                             // Pass the whole Page context, as that is what the templates expect
-                            pcontext,
+                            page_context,
                             // We're not registering any listeners here, so we can pass None
                             None,
                         )?)
@@ -329,11 +289,10 @@ macro_rules! reactivity_bindgen {
 
             fn activate() {
                 let listeners = LISTENERS_MAP.lock().unwrap();
-                for (selector, (ty, outputid, template)) in listeners.iter() {
+                for (selector, (ty, template)) in listeners.iter() {
                     let deets = $imports::ListenDetails {
                         selector: selector.to_string(),
                         ty: ty.to_string(),
-                        outputid: outputid.to_string(),
                         template: template.to_string(),
                     };
 

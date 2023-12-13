@@ -12,7 +12,7 @@ export function prnt(string) {
  * @param {{selector: string, ty: string, value: string}} param0 - The CSS selector we want to listen on, ty is the event type, value
  * @param {function} handler - function to run when event is triggered
  */
-export function addeventlistener({ selector, ty, outputid, template }) {
+export function addeventlistener({ selector, ty, template }) {
 	// The Broadcast channel name must be the same as the Wurbo
 	// We could import the constant from Wurbo, but this would involve a bundle step to resolve all the code into a single file
 	// Here we use it by string to show how it works
@@ -27,7 +27,6 @@ export function addeventlistener({ selector, ty, outputid, template }) {
 			tag: 'output',
 			val: {
 				value: e.target.value,
-				id: outputid,
 				template
 			}
 		};
@@ -39,17 +38,20 @@ export function addeventlistener({ selector, ty, outputid, template }) {
 
 export function buildCodeString(namespace) {
 	return `
-      export function addeventlistener({ selector, ty, outputid, template }) {
+      export function addeventlistener({ selector, ty, template }) {
         const bc = new BroadcastChannel('listener_updates');
+        console.log({selector, ty, template});
         document.querySelector(selector).addEventListener(ty, (e) => {
-          bc.postMessage(window.${namespace}.render({
-            tag: 'output',
+          console.log({target: e.target});
+          let ctx = {
+            tag: e.target.name,
             val: {
               value: e.target.value,
-              id: outputid,
               template
             }
-          }));
+          };
+          console.log(ctx);
+          bc.postMessage(window.${namespace}.render(ctx));
         });
       }`;
 }
