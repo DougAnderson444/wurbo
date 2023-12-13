@@ -1,13 +1,15 @@
 cargo_component_bindings::generate!();
 
 use bindings::demo::forms::{
-    types::{self, Context as WitContext},
+    types::{self, Context},
     wurbo_in,
 };
+// We will likely have other guests, so let's alias this one to WurboGuest
 use bindings::exports::demo::forms::wurbo_out::Guest as WurboGuest;
 use wurbo::jinja::{Entry, Index, Rest, Templates};
 use wurbo::prelude_bindgen;
 
+/// The struct for the bound component that implements the Guest traits
 struct Component;
 
 /// We need to provide the templates for the macro to pull in
@@ -24,85 +26,43 @@ fn get_templates() -> Templates {
 }
 
 // Macro builds the Component struct and implements the Guest trait for us, saving copy-and-paste
-prelude_bindgen! {}
+prelude_bindgen! {WurboGuest, Component, Context}
 
-impl WurboGuest for Component {
-    fn render(context: WitContext) -> Result<String, String> {
-        // TODO: pass in the templates to the macro.
-        let templates = get_templates();
-
-        println!("rendering ctx: {:?}", context);
-
-        if let WitContext::Content(c) = context {
-            let page_context = PageContext::from(c);
-            // update cache
-            let mut last_state = LAST_STATE.lock().unwrap();
-            *last_state = page_context.clone();
-
-            Ok(wurbo::jinja::render(
-                templates.entry.name,
-                templates,
-                page_context,
-                Some(wurbo_tracker::track),
-            )?)
-        } else {
-            //                let output = Output::from(context);
-            // Build a PageContext with the given Output, as we need to pass an entire PageContext to the template
-            // since the template uses "output.name", etc. this needs to be prepended. The
-            // defaults are discarded in rendering since they don't apply to the output
-            // template
-            // merge context updates with current state
-            let page_context = PageContext::from(&context.clone());
-            // update cache to pcontext
-            let mut last_state = LAST_STATE.lock().unwrap();
-            *last_state = page_context.clone();
-
-            Ok(wurbo::jinja::render(
-                // The chosen template to update
-                &templates.output.name.to_string(),
-                // Pass all the template for reference
-                templates,
-                // Pass the whole Page context, as that is what the templates expect
-                page_context,
-                // We're not registering any listeners here, so we can pass None
-                None,
-            )?)
-        }
-        // WitContext::Username(u) => {
-        //     let username = Username::from(u);
-        //     // merge context updates with current state
-        //     let page_context = PageContext::from(username.clone());
-        //     // update cache to pcontext
-        //     let mut last_state = LAST_STATE.lock().unwrap();
-        //     *last_state = page_context.clone();
-        //
-        //     Ok(wurbo::jinja::render(
-        //         // The chosen template to update
-        //         &templates.output.name.to_string(),
-        //         // Pass all the template for reference
-        //         templates,
-        //         // Pass the whole Page context, as that is what the templates expect
-        //         page_context,
-        //         // We're not registering any listeners here, so we can pass None
-        //         None,
-        //     )?)
-        // }
-        // }
-    }
-
-    fn activate() {
-        let listeners = LISTENERS_MAP.lock().unwrap();
-        for (selector, (ty, template)) in listeners.iter() {
-            let deets = wurbo_in::ListenDetails {
-                selector: selector.to_string(),
-                ty: ty.to_string(),
-                template: template.to_string(),
-            };
-
-            wurbo_in::addeventlistener(&deets);
-        }
-    }
-}
+// impl WurboGuest for Component {
+//     fn render(context: types::Context) -> Result<String, String> {
+//         // TODO: pass in the templates to the macro.
+//         let templates = get_templates();
+//         let page_context = PageContext::from(&context);
+//         // update cache
+//         let mut last_state = LAST_STATE.lock().unwrap();
+//         *last_state = page_context.clone();
+//
+//         let entry = match context {
+//             types::Context::Content(_) => templates.entry.name,
+//             _ => templates.output.name,
+//         };
+//
+//         Ok(wurbo::jinja::render(
+//             entry,
+//             templates,
+//             page_context,
+//             Some(wurbo_tracker::track),
+//         )?)
+//     }
+//
+//     fn activate() {
+//         let listeners = LISTENERS_MAP.lock().unwrap();
+//         for (selector, (ty, template)) in listeners.iter() {
+//             let deets = wurbo_in::ListenDetails {
+//                 selector: selector.to_string(),
+//                 ty: ty.to_string(),
+//                 template: template.to_string(),
+//             };
+//
+//             wurbo_in::addeventlistener(&deets);
+//         }
+//     }
+// }
 
 /// PageContext is the context with impl of StructObject
 #[derive(Debug, Default, Clone)]
@@ -241,9 +201,6 @@ impl StructObject for Input {
 /// Output is the output area
 #[derive(Debug, Default, Clone)]
 struct Output {
-    // the value that is passed to the template as the prop
-    value: String,
-    // the id of the element
     id: Option<String>,
     username: Username,
     password: Password,
@@ -281,14 +238,13 @@ impl StructObject for Output {
 
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value", "count", "id"])
+        Some(&["value", "count", "id", "username", "password"])
     }
 }
 
 impl From<types::Output> for Output {
     fn from(context: types::Output) -> Self {
         Output {
-            value: context.value.unwrap_or_default(),
             id: context.id,
             username: Username::from(context.username),
             password: Password::from(context.password),

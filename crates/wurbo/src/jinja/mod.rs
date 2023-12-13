@@ -35,7 +35,7 @@ impl Templates {
     pub fn new(entry: Index, output: Entry, rest: Rest) -> Self {
         Self {
             entry: entry.0,
-            output: output,
+            output,
             rest: rest.0,
         }
     }
@@ -147,7 +147,11 @@ pub fn render(
 }
 #[macro_export]
 macro_rules! prelude_bindgen {
-    () => {
+    ( 
+        $guest: ident,
+        $component: ident,
+        $context:ident
+) => {
         use $crate::prelude::*;
 
         use std::collections::HashMap;
@@ -183,6 +187,42 @@ macro_rules! prelude_bindgen {
                 // let selector = format!("#{} #{}", id_parent, id_child);
                 listeners.insert(format!("#{elem_id}"), (ty, template));
                 elem_id
+            }
+        }
+
+        impl $guest for $component {
+            fn render(context: $context) -> Result<String, String> {
+                // TODO: pass in the templates to the macro.
+                let templates = get_templates();
+                let page_context = PageContext::from(&context);
+                // update cache
+                let mut last_state = LAST_STATE.lock().unwrap();
+                *last_state = page_context.clone();
+
+                let entry = match context {
+                    types::Context::Content(_) => templates.entry.name,
+                    _ => templates.output.name,
+                };
+
+                Ok(wurbo::jinja::render(
+                    entry,
+                    templates,
+                    page_context,
+                    Some(wurbo_tracker::track),
+                )?)
+            }
+
+            fn activate() {
+                let listeners = LISTENERS_MAP.lock().unwrap();
+                for (selector, (ty, template)) in listeners.iter() {
+                    let deets = wurbo_in::ListenDetails {
+                        selector: selector.to_string(),
+                        ty: ty.to_string(),
+                        template: template.to_string(),
+                    };
+
+                    wurbo_in::addeventlistener(&deets);
+                }
             }
         }
     };
