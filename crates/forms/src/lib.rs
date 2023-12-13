@@ -47,49 +47,29 @@ impl StructObject for PageContext {
     }
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
+        Some(&["page", "input", "output"])
     }
 }
 
+/// We received Context from the WIT ABO and need to convert it to PageContext
 impl From<&types::Context> for PageContext {
     fn from(context: &types::Context) -> Self {
         match context {
             types::Context::Content(c) => PageContext::from(c.clone()),
             types::Context::Username(u) => PageContext::from(Username::from(u)),
             types::Context::Password(p) => PageContext::from(Password::from(p)),
-            types::Context::Output(o) => PageContext::from(o.clone()),
         }
     }
 }
 
+/// We have all the content, convert it to PageContext
 impl From<types::Content> for PageContext {
     fn from(context: types::Content) -> Self {
         PageContext {
-            page: Page {
-                title: context.page.title,
-            },
-            input: Input {
-                placeholder: context.input.placeholder,
-            },
-            output: Output::from(context.output),
+            page: Page::from(context.page),
+            input: Input::from(context.input),
+            output: Output::default(),
         }
-    }
-}
-
-impl From<types::Output> for PageContext {
-    fn from(context: types::Output) -> Self {
-        let state = { LAST_STATE.lock().unwrap().clone() };
-        PageContext {
-            output: Output::from(context),
-            ..state
-        }
-    }
-}
-
-impl From<Output> for PageContext {
-    fn from(output: Output) -> Self {
-        let state = { LAST_STATE.lock().unwrap().clone() };
-        PageContext { output, ..state }
     }
 }
 
@@ -141,6 +121,14 @@ impl StructObject for Page {
     }
 }
 
+impl From<types::Page> for Page {
+    fn from(context: types::Page) -> Self {
+        Page {
+            title: context.title,
+        }
+    }
+}
+
 /// Input is the input form(s)
 #[derive(Debug, Default, Clone)]
 struct Input {
@@ -162,7 +150,15 @@ impl StructObject for Input {
     }
 }
 
-/// Output is the output area
+impl From<types::Input> for Input {
+    fn from(context: types::Input) -> Self {
+        Input {
+            placeholder: context.placeholder,
+        }
+    }
+}
+
+/// Output handles the storage of the values and the calculation of the length of the concatenated
 #[derive(Debug, Default, Clone)]
 struct Output {
     id: Option<String>,
@@ -171,21 +167,19 @@ struct Output {
 }
 
 impl Output {
+    /// Calculate the length of the username and password concatenated
     fn calculate(&self) -> Value {
-        // const VOWELS: &[char] = &['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'];
-        //
-        // pub fn count_vowels(s: &str) -> usize {
-        //     s.chars().filter(|c| VOWELS.contains(c)).count()
-        // }
-
         Value::from(*&self.concat().len())
     }
 
+    /// Concatenate the username and password
     fn concat(&self) -> String {
         format!("{}{}", self.username.value, self.password.value)
     }
 }
 
+/// Impleent StructObject for Output so we can use minijina to automagically calculate the length
+/// of the username and password concatenated
 impl StructObject for Output {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
@@ -206,28 +200,7 @@ impl StructObject for Output {
     }
 }
 
-impl From<types::Output> for Output {
-    fn from(context: types::Output) -> Self {
-        Output {
-            id: context.id,
-            username: Username::from(context.username),
-            password: Password::from(context.password),
-        }
-    }
-}
-
-impl From<Option<types::Output>> for Output {
-    fn from(context: Option<types::Output>) -> Self {
-        match context {
-            Some(c) => Output::from(c),
-            None => Output::default(),
-        }
-    }
-}
-
-/// Username is the username input.
-/// We need a separate template for Username so we can direct the prop there.
-/// If we have a separate template, we need a separate struct?
+/// Username captures is the username input value.
 #[derive(Debug, Default, Clone)]
 struct Username {
     // the value that is passed to the template as the prop
@@ -244,7 +217,7 @@ impl StructObject for Username {
 
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value", "id"])
+        Some(&["value"])
     }
 }
 
@@ -282,7 +255,7 @@ impl StructObject for Password {
 
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value", "id"])
+        Some(&["value"])
     }
 }
 

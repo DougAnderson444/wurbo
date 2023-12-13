@@ -17,6 +17,7 @@ interface types {
   record input {
     placeholder: string
   }
+
   record outrecord {
     value: string,
   }
@@ -44,7 +45,6 @@ interface types {
     content(content),
     username(outrecord),
     password(outrecord),
-    output(output)
   }
 
 }
