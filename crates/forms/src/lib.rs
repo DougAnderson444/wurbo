@@ -28,42 +28,6 @@ fn get_templates() -> Templates {
 // Macro builds the Component struct and implements the Guest trait for us, saving copy-and-paste
 prelude_bindgen! {WurboGuest, Component, Context}
 
-// impl WurboGuest for Component {
-//     fn render(context: types::Context) -> Result<String, String> {
-//         // TODO: pass in the templates to the macro.
-//         let templates = get_templates();
-//         let page_context = PageContext::from(&context);
-//         // update cache
-//         let mut last_state = LAST_STATE.lock().unwrap();
-//         *last_state = page_context.clone();
-//
-//         let entry = match context {
-//             types::Context::Content(_) => templates.entry.name,
-//             _ => templates.output.name,
-//         };
-//
-//         Ok(wurbo::jinja::render(
-//             entry,
-//             templates,
-//             page_context,
-//             Some(wurbo_tracker::track),
-//         )?)
-//     }
-//
-//     fn activate() {
-//         let listeners = LISTENERS_MAP.lock().unwrap();
-//         for (selector, (ty, template)) in listeners.iter() {
-//             let deets = wurbo_in::ListenDetails {
-//                 selector: selector.to_string(),
-//                 ty: ty.to_string(),
-//                 template: template.to_string(),
-//             };
-//
-//             wurbo_in::addeventlistener(&deets);
-//         }
-//     }
-// }
-
 /// PageContext is the context with impl of StructObject
 #[derive(Debug, Default, Clone)]
 pub struct PageContext {

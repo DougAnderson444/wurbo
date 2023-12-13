@@ -279,8 +279,6 @@ macro_rules! reactivity_bindgen {
                 // TODO: pass in the templates to the macro.
                 let templates = get_templates();
 
-                println!("rendering ctx: {:?}", context);
-
                 match context {
                     $context::Content(c) => {
                         let page_context = PageContext::from(c);

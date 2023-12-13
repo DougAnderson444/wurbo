@@ -38,8 +38,9 @@ export function addeventlistener({ selector, ty, template }) {
 
 export function buildCodeString(namespace) {
 	return `
+      const CHANNEL_NAME = 'listener_updates';
+      const bc = new BroadcastChannel(CHANNEL_NAME);
       export function addeventlistener({ selector, ty, template }) {
-        const bc = new BroadcastChannel('listener_updates');
         document.querySelector(selector).addEventListener(ty, (e) => {
           let ctx = {
             tag: e.target.name,
