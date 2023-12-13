@@ -40,16 +40,13 @@ export function buildCodeString(namespace) {
 	return `
       export function addeventlistener({ selector, ty, template }) {
         const bc = new BroadcastChannel('listener_updates');
-        console.log({selector, ty, template});
         document.querySelector(selector).addEventListener(ty, (e) => {
-          console.log({target: e.target});
           let ctx = {
             tag: e.target.name,
             val: {
               value: e.target.value,
             }
           };
-          console.log(ctx);
           bc.postMessage(window.${namespace}.render(ctx));
         });
       }`;
