@@ -1,6 +1,6 @@
 {
 	"name": "wurbo",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"license": "MIT",
 	"author": "DougAnderson444 <DougAnderson444@gmail.com>",
 	"description": "A tiny front-end framework for webassembly components",
@@ -15,7 +15,9 @@
 			"default": "./dist/index.js"
 		}
 	},
-  "files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
@@ -35,7 +37,7 @@
 		"postcss": "^8.4.24",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",
-		"rollup-plugin-wit-component": "^0.1.1",
+		"rollup-plugin-wit-component": "^0.1.3",
 		"svelte": "^4.0.0",
 		"svelte-check": "^3.4.3",
 		"tailwindcss": "^3.3.2",
