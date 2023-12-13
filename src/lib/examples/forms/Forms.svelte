@@ -41,8 +41,7 @@
 			tag: 'content',
 			val: {
 				page: { title: "Let's process the contents of a form." },
-				input: { placeholder: 'Enter a Username here' },
-				output: { value: 'forms', username: { value: '' } }
+				input: { placeholder: 'Enter a Username here' }
 			}
 		};
 		renderedHTML = mod.wurboOut.render(data);

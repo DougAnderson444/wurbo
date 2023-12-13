@@ -19,33 +19,31 @@ interface types {
   }
   record outrecord {
     value: string,
-    // optional id string: None is intial render, Some for update value
-    id: option<string>,
-    // tell the render function what the name of the template is. Defaults to "output.html"
-    template: option<string>
   }
 
   record output {
-    value: string,
+    // the resulting value of the total outputs combined
+    value: option<string>,
     // optional id string: None is intial render, Some for update value
     id: option<string>,
-    // tell the render function what the name of the template is. Defaults to "output.html"
-    template: option<string>,
     // the output dest for the username changes
-    username: outrecord,
+    username: option<outrecord>,
+    // the output dest for the password changes
+    password: option<outrecord>
   }
 
   // COntent for the entire page
   record content {
     page: page,
     input: input,
-    output: output
+    output: option<output>
   }
 
   // Context variants
   variant context {
     content(content),
     username(outrecord),
+    password(outrecord),
     output(output)
   }
 

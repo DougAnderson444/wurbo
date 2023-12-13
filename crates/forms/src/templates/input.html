@@ -16,5 +16,16 @@
 				/>
 			</div>
 		</div>
+		<div class="flex-1">
+			<div class="flex-1">Password:</div>
+			<div class="flex-1">
+				<input
+					id="{{ input.password_input|on('keyup', 'username.html') }}"
+					name="password"
+					data-content="password"
+					class="rounded border border-blue-400 bg-red-100 text-neutral-700 p-2 m-2 placeholder:Enter"
+				/>
+			</div>
+		</div>
 	</div>
 </div>

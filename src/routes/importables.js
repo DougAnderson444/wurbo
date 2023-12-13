@@ -47,7 +47,6 @@ export function buildCodeString(namespace) {
             tag: e.target.name,
             val: {
               value: e.target.value,
-              template
             }
           };
           console.log(ctx);

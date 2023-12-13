@@ -131,7 +131,8 @@ impl From<&types::Context> for PageContext {
     fn from(context: &types::Context) -> Self {
         match context {
             types::Context::Content(c) => PageContext::from(c.clone()),
-            types::Context::Username(u) => PageContext::from(u.clone()),
+            types::Context::Username(u) => PageContext::from(Username::from(u)),
+            types::Context::Password(p) => PageContext::from(Password::from(p)),
             types::Context::Output(o) => PageContext::from(o.clone()),
         }
     }
@@ -183,21 +184,17 @@ impl From<Username> for PageContext {
     }
 }
 
-impl From<types::Outrecord> for PageContext {
-    fn from(outrecord: types::Outrecord) -> Self {
+impl From<Password> for PageContext {
+    fn from(password: Password) -> Self {
         let state = { LAST_STATE.lock().unwrap().clone() };
         let pc = PageContext {
             output: Output {
-                username: Username {
-                    value: outrecord.value,
-                    id: outrecord.id,
-                    template: outrecord.template,
-                },
+                password,
                 ..state.output
             },
             ..state
         };
-        println!("outrecord pc: {:?}", pc);
+        println!("password pc: {:?}", pc);
         pc
     }
 }
@@ -250,22 +247,23 @@ struct Output {
     value: String,
     // the id of the element
     id: Option<String>,
-    // the teplate string to use as "entry" during `render`
-    // discarded after `render` is called
-    template: Option<String>,
     username: Username,
-    // password: Password,
+    password: Password,
 }
 
 impl Output {
     fn calculate(&self) -> Value {
-        const VOWELS: &[char] = &['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'];
+        // const VOWELS: &[char] = &['a', 'A', 'e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'];
+        //
+        // pub fn count_vowels(s: &str) -> usize {
+        //     s.chars().filter(|c| VOWELS.contains(c)).count()
+        // }
 
-        pub fn count_vowels(s: &str) -> usize {
-            s.chars().filter(|c| VOWELS.contains(c)).count()
-        }
+        Value::from(*&self.concat().len())
+    }
 
-        Value::from(count_vowels(&self.username.value))
+    fn concat(&self) -> String {
+        format!("{}{}", self.username.value, self.password.value)
     }
 }
 
@@ -273,7 +271,8 @@ impl StructObject for Output {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
             "username" => Some(Value::from_struct_object(self.username.clone())),
-            "value" => Some(Value::from(self.username.value.clone())),
+            "password" => Some(Value::from_struct_object(self.password.clone())),
+            "value" => Some(Value::from(self.concat())),
             // self.username.value
             "count" => Some(Value::from(self.calculate())),
             // if self.id.is_some, use it, otherwise generate a new one
@@ -291,14 +290,19 @@ impl StructObject for Output {
 impl From<types::Output> for Output {
     fn from(context: types::Output) -> Self {
         Output {
-            value: context.value,
+            value: context.value.unwrap_or_default(),
             id: context.id,
-            template: context.template,
-            username: Username {
-                value: context.username.value,
-                id: context.username.id,
-                template: context.username.template,
-            },
+            username: Username::from(context.username),
+            password: Password::from(context.password),
+        }
+    }
+}
+
+impl From<Option<types::Output>> for Output {
+    fn from(context: Option<types::Output>) -> Self {
+        match context {
+            Some(c) => Output::from(c),
+            None => Output::default(),
         }
     }
 }
@@ -310,19 +314,12 @@ impl From<types::Output> for Output {
 struct Username {
     // the value that is passed to the template as the prop
     value: String,
-    // the id of the element
-    id: Option<String>,
-    // the teplate string to use as "entry" during `render`
-    // discarded after `render` is called
-    template: Option<String>,
 }
 
 impl StructObject for Username {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
             "value" => Some(Value::from(self.value.clone())),
-            // if self.id.is_some, use it, otherwise generate a new one
-            "id" => Some(Value::from(self.id.clone().unwrap_or(utils::rand_id()))),
             _ => None,
         }
     }
@@ -333,12 +330,57 @@ impl StructObject for Username {
     }
 }
 
-impl From<types::Outrecord> for Username {
-    fn from(context: types::Outrecord) -> Self {
+impl From<&types::Outrecord> for Username {
+    fn from(context: &types::Outrecord) -> Self {
         Username {
-            value: context.value,
-            id: context.id,
-            template: context.template,
+            value: context.value.to_string(),
+        }
+    }
+}
+
+impl From<Option<types::Outrecord>> for Username {
+    fn from(context: Option<types::Outrecord>) -> Self {
+        match context {
+            Some(c) => Username::from(&c),
+            None => Username::default(),
+        }
+    }
+}
+
+/// Password is the password field in the form
+#[derive(Debug, Default, Clone)]
+struct Password {
+    // the value that is passed to the template as the prop
+    value: String,
+}
+
+impl StructObject for Password {
+    fn get_field(&self, name: &str) -> Option<Value> {
+        match name {
+            "value" => Some(Value::from(self.value.clone())),
+            _ => None,
+        }
+    }
+
+    /// So that debug will show the values
+    fn static_fields(&self) -> Option<&'static [&'static str]> {
+        Some(&["value", "id"])
+    }
+}
+
+impl From<&types::Outrecord> for Password {
+    fn from(context: &types::Outrecord) -> Self {
+        Password {
+            value: context.value.to_string(),
+        }
+    }
+}
+
+impl From<Option<types::Outrecord>> for Password {
+    fn from(context: Option<types::Outrecord>) -> Self {
+        match context {
+            Some(c) => Password::from(&c),
+            None => Password::default(),
         }
     }
 }
