@@ -18,6 +18,10 @@ interface types {
     placeholder: string
   }
 
+  record outrecord {
+    value: string,
+  }
+
   record output {
     value: string,
     // optional id string: None is intial render, Some for update value
@@ -29,13 +33,13 @@ interface types {
   record content {
     page: page,
     input: input,
-    output: output
+    output: option<output>
   }
 
   // Context variants
   variant context {
     content(content),
-    output(output)
+    phrase(outrecord)
   }
 
 }

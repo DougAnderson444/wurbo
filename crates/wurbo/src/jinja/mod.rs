@@ -167,7 +167,7 @@ macro_rules! prelude_bindgen {
         // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
         static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
         // cache the last state of PageContext as Mutex
-        static ref LAST_STATE: Mutex<PageContext> = Mutex::new(PageContext::default());
+        static ref LAST_STATE: Mutex<Option<PageContext>> = Mutex::new(None);
         }
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
@@ -197,7 +197,7 @@ macro_rules! prelude_bindgen {
                 let page_context = PageContext::from(&context);
                 // update cache
                 let mut last_state = LAST_STATE.lock().unwrap();
-                *last_state = page_context.clone();
+                *last_state = Some(page_context.clone());
 
                 let entry = match context {
                     types::Context::Content(_) => templates.entry.name,
@@ -222,117 +222,6 @@ macro_rules! prelude_bindgen {
                     };
 
                     wurbo_in::addeventlistener(&deets);
-                }
-            }
-        }
-    };
-}
-
-#[macro_export]
-macro_rules! reactivity_bindgen {
-    (
-        $guest: ident,
-        $component: ident,
-        $context:ident,
-        $imports:ident
-) => {
-        use $crate::prelude::*;
-
-        use std::collections::HashMap;
-        use std::sync::Mutex;
-
-        ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, (String, String)>;
-
-        // We cannot have &self in the Component struct,
-        // so we use static variables to store the state between functions
-        // See https://crates.io/crates/lazy_static
-        lazy_static! {
-        // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
-        static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
-        // cache the last state of PageContext as Mutex
-        static ref LAST_STATE: Mutex<PageContext> = Mutex::new(PageContext::default());
-        }
-
-        /// unique namespace to clairfy and avoid collisions with other Guest code
-        mod wurbo_tracker {
-            /// Insert the source element id, event type, and target output id into the LISTENERS_MAP
-            ///
-            /// # Example
-            ///
-            /// ```rust
-            /// let my_CSS_selector = "#some_selector";
-            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup", "my_output_id", "my_template.html");
-            /// ```
-            pub fn track(elem_id: String, ty: String, template: String) -> String {
-                let mut listeners = super::LISTENERS_MAP.lock().unwrap();
-                // This is how you specify a selector that is the id_child of the parent with
-                // id_parent:
-                // let selector = format!("#{} #{}", id_parent, id_child);
-                listeners.insert(format!("#{elem_id}"), (ty, template));
-                elem_id
-            }
-        }
-
-        impl $guest for $component {
-            fn render(context: $context) -> Result<String, String> {
-                // TODO: pass in the templates to the macro.
-                let templates = get_templates();
-
-                match context {
-                    $context::Content(c) => {
-                        let page_context = PageContext::from(c);
-                        // update cache
-                        let mut last_state = LAST_STATE.lock().unwrap();
-                        *last_state = page_context.clone();
-
-                        Ok(wurbo::jinja::render(
-                            templates.entry.name,
-                            templates,
-                            page_context,
-                            Some(wurbo_tracker::track),
-                        )?)
-                    }
-                    // for each other type of $context variant, follow the pattern below:
-                    $context::Output(o) => {
-                        let output = Output::from(o);
-                        // Build a PageContext with the given Output, as we need to pass an entire PageContext to the template
-                        // since the template uses "output.name", etc. this needs to be prepended. The
-                        // defaults are discarded in rendering since they don't apply to the output
-                        // template
-                        // merge context updates with current state
-                        let page_context = PageContext {
-                            output: output.clone(),
-                            ..LAST_STATE.lock().unwrap().clone()
-                        };
-                        // update cache to pcontext
-                        let mut last_state = LAST_STATE.lock().unwrap();
-                        *last_state = page_context.clone();
-
-                        Ok(wurbo::jinja::render(
-                            // The chosen template to update
-                            &output.template.unwrap_or(templates.output.name.to_string()),
-                            // Pass all the template for reference
-                            templates,
-                            // Pass the whole Page context, as that is what the templates expect
-                            page_context,
-                            // We're not registering any listeners here, so we can pass None
-                            None,
-                        )?)
-                    }
-                }
-            }
-
-            fn activate() {
-                let listeners = LISTENERS_MAP.lock().unwrap();
-                for (selector, (ty, template)) in listeners.iter() {
-                    let deets = $imports::ListenDetails {
-                        selector: selector.to_string(),
-                        ty: ty.to_string(),
-                        template: template.to_string(),
-                    };
-
-                    $imports::addeventlistener(&deets);
                 }
             }
         }

@@ -1,13 +1,9 @@
-// the render crate needs braces to work
-// #![allow(unused_braces)]
-
 cargo_component_bindings::generate!();
 
-use wurbo::jinja::Entry;
-use wurbo::jinja::Index;
-use wurbo::jinja::Rest;
-use wurbo::jinja::Templates;
-use wurbo::reactivity_bindgen;
+use std::ops::Deref;
+
+use wurbo::jinja::{Entry, Index, Rest, Templates};
+use wurbo::prelude_bindgen;
 
 // mod components;
 // mod input;
@@ -19,7 +15,7 @@ mod utils;
 // use input::Input;
 // use output::Output;
 
-use crate::bindings::demo::vowels::types::{self, Context as WitContext};
+use crate::bindings::demo::vowels::types::{self, Context};
 use crate::bindings::demo::vowels::wurbo_in;
 use crate::bindings::exports::demo::vowels::wurbo_out::Guest as WurboGuest;
 
@@ -44,15 +40,10 @@ fn get_templates() -> Templates {
 }
 
 // Macro builds the Component struct and implements the Guest trait for us
-reactivity_bindgen! {
-    WurboGuest,
-    Component,
-    WitContext,
-    wurbo_in
-}
+prelude_bindgen! {WurboGuest, Component, Context}
 
 /// PageContext is the context with impl of StructObject
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct PageContext {
     page: Page,
     input: Input,
@@ -70,33 +61,45 @@ impl StructObject for PageContext {
     }
     /// So that debug will show the values
     fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
+        Some(&["page", "input", "output"])
+    }
+}
+
+impl From<&types::Context> for PageContext {
+    fn from(context: &types::Context) -> Self {
+        match context {
+            types::Context::Content(c) => PageContext::from(c.clone()),
+            types::Context::Phrase(p) => PageContext::from(Phrase::from(p)),
+        }
     }
 }
 
 impl From<types::Content> for PageContext {
     fn from(context: types::Content) -> Self {
         PageContext {
-            page: Page {
-                title: context.page.title,
-            },
-            input: Input {
-                placeholder: context.input.placeholder,
-            },
-            output: Output {
-                value: context.output.value,
-                id: context.output.id,
-                template: context.output.template,
-            },
+            page: Page::from(context.page),
+            input: Input::from(context.input),
+            // We can use default for Output because the minijinja StructObject impl will
+            // calculate the values from the above inouts for us
+            output: Output::default(),
+        }
+    }
+}
+
+impl From<Phrase> for PageContext {
+    fn from(context: Phrase) -> Self {
+        // Safe to unwrap here because render on all page content will always be called first
+        let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+        PageContext {
+            output: Output::from(context),
+            ..state
         }
     }
 }
 
 /// Page is the wrapper for Input and Output
-#[derive(Debug, Default, Clone)]
-struct Page {
-    title: String,
-}
+#[derive(Debug, Clone)]
+struct Page(types::Page);
 
 impl StructObject for Page {
     fn get_field(&self, name: &str) -> Option<Value> {
@@ -112,11 +115,23 @@ impl StructObject for Page {
     }
 }
 
-/// Input is the input form(s)
-#[derive(Debug, Default, Clone)]
-struct Input {
-    placeholder: String,
+impl From<types::Page> for Page {
+    fn from(page: types::Page) -> Self {
+        Page(page)
+    }
 }
+
+impl Deref for Page {
+    type Target = types::Page;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+/// Input is the input form(s)
+#[derive(Debug, Clone)]
+struct Input(types::Input);
 
 impl StructObject for Input {
     fn get_field(&self, name: &str) -> Option<Value> {
@@ -132,12 +147,25 @@ impl StructObject for Input {
     }
 }
 
+impl From<types::Input> for Input {
+    fn from(context: types::Input) -> Self {
+        Input(context)
+    }
+}
+
+impl Deref for Input {
+    type Target = types::Input;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// Output is the output area
 #[derive(Debug, Default, Clone)]
 struct Output {
     value: String,
     id: Option<String>,
-    template: Option<String>,
 }
 
 impl Output {
@@ -170,7 +198,52 @@ impl From<types::Output> for Output {
         Output {
             value: context.value,
             id: context.id,
-            template: context.template,
         }
+    }
+}
+
+impl From<Phrase> for Output {
+    fn from(context: Phrase) -> Self {
+        Output {
+            value: context.value.clone(),
+            ..Default::default()
+        }
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct Phrase(Option<types::Outrecord>);
+
+impl StructObject for Phrase {
+    fn get_field(&self, name: &str) -> Option<Value> {
+        match name {
+            "phrase" => Some(Value::from(self.value.clone())),
+            _ => None,
+        }
+    }
+
+    /// So that debug will show the values
+    fn static_fields(&self) -> Option<&'static [&'static str]> {
+        Some(&["phrase"])
+    }
+}
+
+impl From<&types::Outrecord> for Phrase {
+    fn from(context: &types::Outrecord) -> Self {
+        Phrase(Some(context.clone()))
+    }
+}
+
+impl From<Option<types::Outrecord>> for Phrase {
+    fn from(context: Option<types::Outrecord>) -> Self {
+        Phrase(context)
+    }
+}
+
+impl Deref for Phrase {
+    type Target = types::Outrecord;
+
+    fn deref(&self) -> &Self::Target {
+        self.0.as_ref().unwrap()
     }
 }

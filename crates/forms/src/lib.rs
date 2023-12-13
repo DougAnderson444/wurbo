@@ -1,5 +1,7 @@
 cargo_component_bindings::generate!();
 
+use std::ops::Deref;
+
 use bindings::demo::forms::{
     types::{self, Context},
     wurbo_in,
@@ -28,8 +30,9 @@ fn get_templates() -> Templates {
 // Macro builds the Component struct and implements the Guest trait for us, saving copy-and-paste
 prelude_bindgen! {WurboGuest, Component, Context}
 
-/// PageContext is the context with impl of StructObject
-#[derive(Debug, Default, Clone)]
+/// PageContext is a struct of other structs that implement [StructObject],
+/// which is why it is not a Newtype wrapper like the others are.
+#[derive(Debug, Clone)]
 pub struct PageContext {
     page: Page,
     input: Input,
@@ -54,6 +57,7 @@ impl StructObject for PageContext {
 /// We received Context from the WIT ABO and need to convert it to PageContext
 impl From<&types::Context> for PageContext {
     fn from(context: &types::Context) -> Self {
+        // Output is not a type of context, because it is calculated from the other values
         match context {
             types::Context::Content(c) => PageContext::from(c.clone()),
             types::Context::Username(u) => PageContext::from(Username::from(u)),
@@ -68,6 +72,8 @@ impl From<types::Content> for PageContext {
         PageContext {
             page: Page::from(context.page),
             input: Input::from(context.input),
+            // We can use default for Output because the minijinja StructObject impl will
+            // calculate the values from the above inouts for us
             output: Output::default(),
         }
     }
@@ -75,37 +81,36 @@ impl From<types::Content> for PageContext {
 
 impl From<Username> for PageContext {
     fn from(username: Username) -> Self {
-        let state = { LAST_STATE.lock().unwrap().clone() };
-        let pc = PageContext {
+        // Safe to unwrap here because render on all page content will always be called first
+        let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+
+        PageContext {
             output: Output {
                 username,
                 ..state.output
             },
             ..state
-        };
-        pc
+        }
     }
 }
 
 impl From<Password> for PageContext {
     fn from(password: Password) -> Self {
-        let state = { LAST_STATE.lock().unwrap().clone() };
-        let pc = PageContext {
+        // Safe to unwrap here because render on all page content will always be called first
+        let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+        PageContext {
             output: Output {
                 password,
                 ..state.output
             },
             ..state
-        };
-        pc
+        }
     }
 }
 
 /// Page is the wrapper for Input and Output
-#[derive(Debug, Default, Clone)]
-struct Page {
-    title: String,
-}
+#[derive(Debug, Clone)]
+struct Page(types::Page);
 
 impl StructObject for Page {
     fn get_field(&self, name: &str) -> Option<Value> {
@@ -123,17 +128,21 @@ impl StructObject for Page {
 
 impl From<types::Page> for Page {
     fn from(context: types::Page) -> Self {
-        Page {
-            title: context.title,
-        }
+        Page(context)
+    }
+}
+
+impl Deref for Page {
+    type Target = types::Page;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
 /// Input is the input form(s)
-#[derive(Debug, Default, Clone)]
-struct Input {
-    placeholder: String,
-}
+#[derive(Debug, Clone)]
+struct Input(types::Input);
 
 impl StructObject for Input {
     fn get_field(&self, name: &str) -> Option<Value> {
@@ -152,9 +161,15 @@ impl StructObject for Input {
 
 impl From<types::Input> for Input {
     fn from(context: types::Input) -> Self {
-        Input {
-            placeholder: context.placeholder,
-        }
+        Input(context)
+    }
+}
+
+impl Deref for Input {
+    type Target = types::Input;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
@@ -174,7 +189,17 @@ impl Output {
 
     /// Concatenate the username and password
     fn concat(&self) -> String {
-        format!("{}{}", self.username.value, self.password.value)
+        format!(
+            "{}{}",
+            self.username
+                .as_ref()
+                .map(|v| v.value.clone())
+                .unwrap_or_default(),
+            self.password
+                .as_ref()
+                .map(|v| v.value.clone())
+                .unwrap_or_default()
+        )
     }
 }
 
@@ -202,15 +227,15 @@ impl StructObject for Output {
 
 /// Username captures is the username input value.
 #[derive(Debug, Default, Clone)]
-struct Username {
-    // the value that is passed to the template as the prop
-    value: String,
-}
+struct Username(Option<types::Outrecord>);
 
 impl StructObject for Username {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
-            "value" => Some(Value::from(self.value.clone())),
+            "value" => Some(Value::from(
+                // Deref self and use value if is_Some, otherwise use ""
+                self.as_ref().map(|v| v.value.clone()).unwrap_or_default(),
+            )),
             _ => None,
         }
     }
@@ -223,32 +248,38 @@ impl StructObject for Username {
 
 impl From<&types::Outrecord> for Username {
     fn from(context: &types::Outrecord) -> Self {
-        Username {
-            value: context.value.to_string(),
-        }
+        Username(Some(context.clone()))
     }
 }
 
 impl From<Option<types::Outrecord>> for Username {
     fn from(context: Option<types::Outrecord>) -> Self {
-        match context {
-            Some(c) => Username::from(&c),
-            None => Username::default(),
-        }
+        Username(context)
     }
 }
 
-/// Password is the password field in the form
-#[derive(Debug, Default, Clone)]
-struct Password {
-    // the value that is passed to the template as the prop
-    value: String,
+impl Deref for Username {
+    type Target = Option<types::Outrecord>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
+/// [Password] is the password field in the form
+/// We wrap it as a newtype so that we can impl [StructObject] for it
+/// We impl [Deref] so we can access the inner of the Rust smart pointer
+#[derive(Debug, Default, Clone)]
+struct Password(Option<types::Outrecord>);
+
 impl StructObject for Password {
+    // If you add fields to the Outrecord, you'd add them also here below:
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
-            "value" => Some(Value::from(self.value.clone())),
+            "value" => Some(Value::from(
+                // Deref self and use value if is_Some, otherwise use ""
+                self.as_ref().map(|v| v.value.clone()).unwrap_or_default(),
+            )),
             _ => None,
         }
     }
@@ -261,17 +292,20 @@ impl StructObject for Password {
 
 impl From<&types::Outrecord> for Password {
     fn from(context: &types::Outrecord) -> Self {
-        Password {
-            value: context.value.to_string(),
-        }
+        Password(Some(context.clone()))
     }
 }
 
 impl From<Option<types::Outrecord>> for Password {
     fn from(context: Option<types::Outrecord>) -> Self {
-        match context {
-            Some(c) => Password::from(&c),
-            None => Password::default(),
-        }
+        Password(context)
+    }
+}
+
+impl Deref for Password {
+    type Target = Option<types::Outrecord>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
