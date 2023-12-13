@@ -179,7 +179,6 @@ impl From<Username> for PageContext {
             },
             ..state
         };
-        println!("username pc: {:?}", pc);
         pc
     }
 }
@@ -194,7 +193,6 @@ impl From<Password> for PageContext {
             },
             ..state
         };
-        println!("password pc: {:?}", pc);
         pc
     }
 }
