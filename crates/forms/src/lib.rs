@@ -82,29 +82,18 @@ impl From<types::Content> for PageContext {
 impl From<Username> for PageContext {
     fn from(username: Username) -> Self {
         // Safe to unwrap here because render on all page content will always be called first
-        let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
-
-        PageContext {
-            output: Output {
-                username,
-                ..state.output
-            },
-            ..state
-        }
+        let mut state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+        state.output.username = username;
+        state
     }
 }
 
 impl From<Password> for PageContext {
     fn from(password: Password) -> Self {
         // Safe to unwrap here because render on all page content will always be called first
-        let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
-        PageContext {
-            output: Output {
-                password,
-                ..state.output
-            },
-            ..state
-        }
+        let mut state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+        state.output.password = password;
+        state
     }
 }
 
