@@ -41,7 +41,7 @@ interface types {
 
   // Context variants
   variant context {
-    content(content),
+    all-content(content),
     username(outrecord),
     password(outrecord),
   }
