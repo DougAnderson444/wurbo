@@ -40,7 +40,7 @@ fn get_templates() -> Templates {
 }
 
 // Macro builds the Component struct and implements the Guest trait for us
-prelude_bindgen! {WurboGuest, Component, PageContext, Context}
+prelude_bindgen! {WurboGuest, Component, PageContext, Context, LAST_STATE}
 
 /// PageContext is the context with impl of StructObject
 #[derive(Debug, Clone)]

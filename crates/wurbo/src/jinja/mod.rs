@@ -157,7 +157,8 @@ macro_rules! prelude_bindgen {
         $guest: ident,
         $component: ident,
         $pagecontext: ident,
-        $context:ident
+        $context:ident,
+        $state:ident
 ) => {
         use $crate::prelude::*;
 
@@ -174,7 +175,7 @@ macro_rules! prelude_bindgen {
         // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
         static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
         // cache the last state of $pagecontext as Mutex
-        static ref LAST_STATE: Mutex<Option<$pagecontext>> = Mutex::new(None);
+        static ref $state: Mutex<Option<$pagecontext>> = Mutex::new(None);
         }
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
@@ -203,7 +204,7 @@ macro_rules! prelude_bindgen {
                 let templates = get_templates();
                 let page_context = $pagecontext::from(&context);
                 // update cache
-                let mut last_state = LAST_STATE.lock().unwrap();
+                let mut last_state = $state.lock().unwrap();
                 *last_state = Some(page_context.clone());
 
                 // check whether context has page and input fields in it or not
