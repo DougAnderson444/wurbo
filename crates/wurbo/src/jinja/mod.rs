@@ -206,8 +206,10 @@ macro_rules! prelude_bindgen {
                 let mut last_state = LAST_STATE.lock().unwrap();
                 *last_state = Some(page_context.clone());
 
+                // check whether context has page and input fields in it or not
+
                 let entry = match context {
-                    types::Context::AllContent(_) => templates.entry.name,
+                    $context::AllContent(_) => templates.entry.name,
                     _ => templates.output.name,
                 };
 
