@@ -38,7 +38,7 @@
 
 		// call `render` with your inputs for the component
 		let data = {
-			tag: 'content',
+			tag: 'all-content',
 			val: {
 				page: { title: "Let's count vowels using templates for Inputs and Outputs!" },
 				input: { placeholder: "Input the word with vowels it's here" },

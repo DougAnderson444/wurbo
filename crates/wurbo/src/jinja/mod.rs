@@ -207,7 +207,7 @@ macro_rules! prelude_bindgen {
                 *last_state = Some(page_context.clone());
 
                 let entry = match context {
-                    types::Context::Content(_) => templates.entry.name,
+                    types::Context::AllContent(_) => templates.entry.name,
                     _ => templates.output.name,
                 };
 

@@ -38,7 +38,7 @@
 
 		// call `render` with your inputs for the component
 		let data = {
-			tag: 'content',
+			tag: 'all-content',
 			val: {
 				page: { title: "Let's process the contents of a form." },
 				input: { placeholder: 'Enter a Username here' }

@@ -68,7 +68,7 @@ impl StructObject for PageContext {
 impl From<&types::Context> for PageContext {
     fn from(context: &types::Context) -> Self {
         match context {
-            types::Context::Content(c) => PageContext::from(c.clone()),
+            types::Context::AllContent(c) => PageContext::from(c.clone()),
             types::Context::Phrase(p) => PageContext::from(Phrase::from(p)),
         }
     }
@@ -79,9 +79,7 @@ impl From<types::Content> for PageContext {
         PageContext {
             page: Page::from(context.page),
             input: Input::from(context.input),
-            // We can use default for Output because the minijinja StructObject impl will
-            // calculate the values from the above inouts for us
-            output: Output::default(),
+            output: Output::from(context.output),
         }
     }
 }
@@ -198,6 +196,15 @@ impl From<types::Output> for Output {
         Output {
             value: context.value,
             id: context.id,
+        }
+    }
+}
+
+impl From<Option<types::Output>> for Output {
+    fn from(context: Option<types::Output>) -> Self {
+        match context {
+            Some(context) => Output::from(context),
+            None => Default::default(),
         }
     }
 }
