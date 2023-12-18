@@ -1,7 +1,7 @@
 <script>
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import * as wurbo from 'wurbo';
-	import { examples } from '$lib';
+	import examples from '$examples/index.js';
 
 	// get imports as a string
 	import importableCode from './importables.js?raw';
@@ -19,7 +19,7 @@
 <div>
 	<!-- For each Svelte file in examples, display it -->
 	{#if load}
-		{#each examples.default as example}
+		{#each examples as example}
 			<div>
 				<svelte:component this={example} {load} {buildCodeString} />
 			</div>

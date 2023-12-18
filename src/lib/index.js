@@ -39,6 +39,4 @@ export class Listener {
 	}
 }
 
-export * as examples from './examples/index.js';
-
 export { CHANNEL_NAME, GLOBAL_NAMESPACE };

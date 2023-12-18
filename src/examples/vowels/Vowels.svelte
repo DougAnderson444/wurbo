@@ -3,7 +3,7 @@
 	import * as wurbo from 'wurbo';
 
 	// Import wasm component bytes as a url
-	import wasmURL from '../../../../target/wasm32-wasi/release/forms.wasm?url';
+	import wasmURL from '../../../target/wasm32-wasi/release/vowels.wasm?url';
 
 	// get imports from +page.svelte
 	export let buildCodeString;
@@ -31,7 +31,7 @@
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
 		// define the import handles you are giving to your component
-		let importables = [{ 'demo:forms/wurbo-in': buildCodeString(listener.namespace) }];
+		let importables = [{ 'demo:vowels/wurbo-in': buildCodeString(listener.namespace) }];
 
 		// load the import handles into the Wasm component and get the ES module returned
 		mod = await load(wasmBytes, importables);
@@ -40,8 +40,9 @@
 		let data = {
 			tag: 'all-content',
 			val: {
-				page: { title: "Let's process the contents of a form." },
-				input: { placeholder: 'Enter a Username here' }
+				page: { title: "Let's count vowels using templates for Inputs and Outputs!" },
+				input: { placeholder: "Input the word with vowels it's here" },
+				output: { value: 'vowels' }
 			}
 		};
 		renderedHTML = mod.wurboOut.render(data);
