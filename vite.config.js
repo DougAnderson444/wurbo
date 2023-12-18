@@ -6,5 +6,10 @@ export default defineConfig({
 	server: { fs: { strict: false } },
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}']
+	},
+	resolve: {
+		alias: {
+			$examples: '/src/examples'
+		}
 	}
 });

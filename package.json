@@ -1,6 +1,6 @@
 {
 	"name": "wurbo",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"license": "MIT",
 	"author": "DougAnderson444 <DougAnderson444@gmail.com>",
 	"description": "A tiny front-end framework for webassembly components",
@@ -44,6 +44,9 @@
 		"typescript": "^5.0.0",
 		"vite": "^4.3.6",
 		"vitest": "^0.25.3"
+	},
+	"peerDependencies": {
+		"svelte": "^4.0.0"
 	},
 	"type": "module"
 }
