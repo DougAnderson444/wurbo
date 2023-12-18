@@ -48,12 +48,6 @@ interface types {
 
 }
 
-// interface core {
-//
-//   // Core functionality
-//   calculate: func(input: string) -> string;
-// }
-
 interface wurbo-in {
 
   use types.{listen-details};
