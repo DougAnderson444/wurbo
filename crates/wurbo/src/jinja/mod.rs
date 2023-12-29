@@ -17,7 +17,7 @@
 //! - include: to include templates (templates within templates) `{% include "header.html" %}`
 use std::ops::Deref;
 
-mod error;
+pub mod error;
 
 use minijinja::value::StructObject;
 use minijinja::Environment;
@@ -127,20 +127,16 @@ pub fn render(
 
     let tmpl = env.get_template(entry)?;
 
-    let rendered = match tmpl.render(&ctx) {
-        Ok(rendered) => rendered,
-        Err(e) => {
-            println!("Could not render template: {:#}", e);
-            // render causes as well
-            let mut err = &e as &dyn std::error::Error;
-            while let Some(next_err) = err.source() {
-                println!();
-                println!("caused by: {:#}", next_err);
-                err = next_err;
-            }
-            return Err(error::RenderError::from(e));
+    let rendered = tmpl.render(&ctx).map_err(|e| {
+        println!("Could not render template: {:#}", e);
+        // render causes as well
+        let mut err = &e as &dyn std::error::Error;
+        while let Some(next_err) = err.source() {
+            println!("caused by: {:#}", next_err);
+            err = next_err;
         }
-    };
+        error::RenderError::from(e)
+    })?;
     Ok(rendered)
 }
 
@@ -190,6 +186,12 @@ macro_rules! prelude_bindgen {
             /// ```
             pub fn track(elem_id: String, ty: String) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
+
+                // print warning if elem_id string is empty for listener type 'ty'
+                if elem_id.is_empty() {
+                    eprintln!("WARNING: elem_id is empty for listener type '{}'", ty);
+                }
+
                 // This is how you specify a selector that is the id_child of the parent with
                 // id_parent:
                 // let selector = format!("#{} #{}", id_parent, id_child);
@@ -240,49 +242,9 @@ macro_rules! prelude_bindgen {
 #[cfg(test)]
 mod jinja_unit_tests {
     use super::*;
-    use std::path::PathBuf;
 
     #[test]
     fn smoke() -> Result<(), Box<dyn std::error::Error>> {
-        let ctx_struct = PageContext {
-            page: Page {
-                title: "Let's count vowels using templates for Inputs and Outputs!".to_string(),
-            },
-            input: Input {
-                placeholder: "Input the word with vowels it's here".to_string(),
-            },
-            output: Output {
-                name: "vowels".to_string(),
-            },
-        };
-
-        let cwd = std::env::current_dir()?;
-        let path = PathBuf::from(cwd).join("./src/jinja/fixtures");
-        std::fs::write(path.join("data.json"), serde_json::to_string(&ctx_struct)?)?;
-
-        let mut tmpls = Vec::new();
-        tmpls.push(("page.html", include_str!("fixtures/page.html")));
-        tmpls.push(("input.html", include_str!("fixtures/input.html")));
-        tmpls.push(("output.html", include_str!("fixtures/output.html")));
-
-        // mock tracker
-        fn tracker(_elem_id: String, _ty: String) {}
-
-        let rendered_page =
-            render("page.html", &tmpls, ctx_struct.clone(), tracker).expect("test should pass");
-
-        eprintln!("rendered_page:\n{}", rendered_page);
-
-        // write rendered_page to file
-        std::fs::write(path.join("rendered_page.html"), rendered_page)?;
-
-        eprintln!("\nNow, let's render just the Output \n");
-
-        let rendered_output =
-            render("output.html", &tmpls, ctx_struct, tracker).expect("test should pass");
-
-        eprintln!("OUTPUT ONLY:\n{}", rendered_output);
-
         Ok(())
     }
 }
