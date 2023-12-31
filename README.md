@@ -63,6 +63,7 @@ npm run preview -- --open
 To build the code (dev mode does not work due to how Vite handles wasm):
 
 ```bash
+cargo component build --workspace --release
 npm run build
 ```
 
