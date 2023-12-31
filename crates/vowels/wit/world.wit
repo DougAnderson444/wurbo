@@ -53,9 +53,6 @@ interface wurbo-in {
 
   use types.{listen-details};
 
-  // print to the console
-  prnt: func(msg: string);
-
   // Add an event listener to the given element
   addeventlistener: func(details: listen-details);
 
