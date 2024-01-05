@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.dependencies]
 wurbo = { path = "crates/wurbo" }
-minijinja = { version = "1.0.10" }
+minijinja = { version = "1.0.10", features = ["builtins", "json"] }
 
 [profile.release]
 opt-level = "z"          # Optimize for size.
