@@ -27,6 +27,10 @@ export class Listener {
 				if (chosen) {
 					// @ts-ignore
 					chosen.outerHTML = event.data;
+					// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
+					// First, get all the id attributes from the event.data HTML
+					let matching_ids = event.data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
+					mod.wurboOut.activate(matching_ids);
 					return;
 				}
 			}

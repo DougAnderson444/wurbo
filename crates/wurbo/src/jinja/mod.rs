@@ -19,7 +19,7 @@ use std::ops::Deref;
 
 pub mod error;
 
-use minijinja::value::StructObject;
+pub use minijinja::context;
 use minijinja::Environment;
 use minijinja::Value;
 
@@ -104,6 +104,13 @@ impl IntoIterator for Templates {
     }
 }
 
+/// Indexes a string.
+/// # Example
+/// mystring -> mystring[42]
+fn indexify(given: String, index: usize) -> String {
+    format!("{given}[{index}]")
+}
+
 /// Render the given entry filename with the given templates using the context
 /// Trackers will register any event listeners as per the templates' `on` attributes
 pub fn render(
@@ -111,7 +118,7 @@ pub fn render(
     // The chosen template to update
     templates: Templates,
     // as long as ctx_struct implements StructObject, we can use it
-    ctx_struct: impl StructObject + 'static,
+    ctx: Value,
     tracker: fn(String, String) -> String,
 ) -> Result<String, error::RenderError> {
     let mut env = Environment::new();
@@ -122,8 +129,7 @@ pub fn render(
     }
 
     env.add_filter("on", tracker);
-
-    let ctx = Value::from_struct_object(ctx_struct);
+    env.add_filter("append", indexify);
 
     let tmpl = env.get_template(entry)?;
 
@@ -201,7 +207,7 @@ macro_rules! prelude_bindgen {
         }
 
         impl $guest for $component {
-            fn render(context: $context) -> Result<String, String> {
+            fn render(context: $context, target: String) -> Result<String, String> {
                 // TODO: pass in the templates to the macro.
                 let templates = get_templates();
                 let page_context = $pagecontext::from(&context);
@@ -209,24 +215,25 @@ macro_rules! prelude_bindgen {
                 let mut last_state = $state.lock().unwrap();
                 *last_state = Some(page_context.clone());
 
-                // check whether context has page and input fields in it or not
-
-                let entry = match context {
-                    $context::AllContent(_) => templates.entry.name,
-                    _ => templates.output.name,
-                };
+                let ctx = Value::from_struct_object(page_context.clone());
 
                 Ok(wurbo::jinja::render(
-                    entry,
+                    &target,
                     templates,
-                    page_context,
+                    ctx,
                     wurbo_tracker::track,
                 )?)
             }
 
-            fn activate() {
+            fn activate(selectors: Option<Vec<String>>) {
                 let listeners = LISTENERS_MAP.lock().unwrap();
                 for (selector, ty) in listeners.iter() {
+                    // if selectors is Some, then only activate the listeners that match
+                    if let Some(selectors) = &selectors {
+                        if !selectors.contains(&selector.to_string()) {
+                            continue;
+                        }
+                    }
                     let deets = wurbo_in::ListenDetails {
                         selector: selector.to_string(),
                         ty: ty.to_string(),

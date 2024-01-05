@@ -32,7 +32,7 @@ interface types {
   record content {
     page: page,
     input: input,
-    output: option<output>
+    output: option<output>,
   }
 
   // Context variants
@@ -58,15 +58,16 @@ interface wurbo-in {
 
 }
 
-interface wurbo-out  {
+interface wurbo-out {
 
   use types.{context};
 
   // renders the initial Web component with the given data
-  render: func(ctx: context) -> result<string, string>;
+  // and the target template to use as top level entry point
+  render: func(ctx: context, target: string) -> result<string, string>;
 
   // activate listening 
-  activate: func();
+  activate: func(selectors: option<list<string>>);
 }
 
 /// An example world for the component to target.

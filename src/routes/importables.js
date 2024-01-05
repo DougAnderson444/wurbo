@@ -11,7 +11,7 @@ export function buildCodeString(namespace) {
               value: e.target.value,
             }
           };
-          bc.postMessage(window.${namespace}.render(ctx));
+          bc.postMessage(window.${namespace}.render(ctx, e.target.dataset.contextTarget));
         });
       }`;
 }

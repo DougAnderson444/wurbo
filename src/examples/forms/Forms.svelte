@@ -44,7 +44,7 @@
 				input: { placeholder: 'Enter a Username here' }
 			}
 		};
-		renderedHTML = mod.wurboOut.render(data);
+		renderedHTML = mod.wurboOut.render(data, 'page.html');
 
 		// lisen for events from the component
 		listener.listen(mod);
