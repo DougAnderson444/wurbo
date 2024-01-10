@@ -35,6 +35,14 @@ export class Listener {
 				}
 			}
 			console.warn('No element found with id: ', id);
+
+			// The other type of BroadcastChannel message is an event message, which wurbo
+			// re-broadcasts via wurboOut.render(event.data). The components detect this
+			// serialized message, deserde it into a Context and route it accordingly. Which means
+			// the sender needs the Context type of the recipient and serde into that type. This is going
+			// to work for both the JS runner and Rust Serde components. For example, if you want to put all
+			// state changes in the #url hash, then listen on the BroadcastChannel in JS and change the hash.
+			mod.wurboOut.render(event.data);
 		};
 	}
 }
