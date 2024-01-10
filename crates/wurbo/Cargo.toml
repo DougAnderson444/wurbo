@@ -1,6 +1,6 @@
 [package]
 name = "wurbo"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 license = "MIT"
 description = "A timy framework for WebAssembly Component model front-ends"
@@ -17,4 +17,4 @@ authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 lazy_static = "1.4.0"
 nanoid = "0.4.0"
 thiserror = "1.0"
-minijinja = { version = "1.0.9" }
+minijinja = { version = "1.0.11" }
