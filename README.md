@@ -83,6 +83,5 @@ npm publish
 To publish to crates.io:
 
 ```bash
-cd crates/wurbo
-cargo publish
+cargo publish -p wurbo
 ```
