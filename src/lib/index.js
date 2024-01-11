@@ -64,7 +64,12 @@ export class Listener {
 			// the sender needs the Context type of the recipient and serde into that type. This is going
 			// to work for both the JS runner and Rust Serde components. For example, if you want to put all
 			// state changes in the #url hash, then listen on the BroadcastChannel in JS and change the hash.
-			mod.wurboOut.render(ctx);
+			try {
+				// Not all components will have listeners, so we wrap this in a try/catch to avoid ugly errors
+				mod.wurboOut.render(ctx);
+			} catch (e) {
+				console.warn('No listener found for event: ', event.data);
+			}
 		};
 	}
 }
