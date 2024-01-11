@@ -34,7 +34,29 @@ export class Listener {
 					return;
 				}
 			}
-			console.warn('No element found with id: ', id);
+			console.warn('No element found with id: ', id, ' in ctx: ', event.data);
+
+			let ctx = JSON.parse(event.data);
+
+			// recursively convert any arrays to Uint8Arrays
+			// because WIT expects TypedArrays, and we're only going to deal with `list<u8>` for now
+			function convertArrays(obj) {
+				for (let key in obj) {
+					if (obj[key] instanceof Array) {
+						obj[key] = new Uint8Array(obj[key]);
+					} else if (typeof obj[key] === 'object') {
+						convertArrays(obj[key]);
+					}
+				}
+			}
+
+			// check if ctx is a valid JavaScript object
+			if (!ctx || typeof ctx !== 'object') {
+				console.warn('ctx is not a valid JavaScript object', event.data);
+				ctx = event.data;
+			} else {
+				convertArrays(ctx);
+			}
 
 			// The other type of BroadcastChannel message is an event message, which wurbo
 			// re-broadcasts via wurboOut.render(event.data). The components detect this
@@ -42,7 +64,7 @@ export class Listener {
 			// the sender needs the Context type of the recipient and serde into that type. This is going
 			// to work for both the JS runner and Rust Serde components. For example, if you want to put all
 			// state changes in the #url hash, then listen on the BroadcastChannel in JS and change the hash.
-			mod.wurboOut.render(event.data);
+			mod.wurboOut.render(ctx);
 		};
 	}
 }
