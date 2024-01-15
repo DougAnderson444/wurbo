@@ -22,7 +22,6 @@ export class Listener {
 					?.id || null;
 			// if the id is not null, then we can update the html with the new string
 			if (id) {
-				// @ts-ignore
 				let chosen = document.getElementById(id);
 				if (chosen) {
 					// @ts-ignore
@@ -34,7 +33,7 @@ export class Listener {
 					return;
 				}
 			}
-			console.warn('No element found with id: ', id, ' in ctx: ', event.data);
+			console.warn(`No element found with id=${id} in ctx: \n ${event.data}`);
 
 			let ctx = JSON.parse(event.data);
 

@@ -5,13 +5,41 @@ export function buildCodeString(namespace) {
       const bc = new BroadcastChannel('${namespace}');
       export function addeventlistener({ selector, ty }) {
         document.querySelector(selector).addEventListener(ty, (e) => {
-          let ctx = {
-            tag: e.target.name,
-            val: {
-              value: e.target.value,
-            }
+
+          // detect if form event
+          if(e.target.closest('form')) {
+            e.preventDefault();
+          }
+
+          let tag  = e.target.dataset.contextName || e.target.name;
+
+          console.log('tag', tag, e.target.dataset.contextName);
+
+          if(!tag) { 
+            console.warn('No name or data-context-name found for event: ', e.target);
+            return;
+          }
+
+          console.log(typeof JSON.parse(e.target.dataset.contextValue) === 'object', {ctxVal: JSON.parse(e.target.dataset.contextValue)});
+
+          let ctx = { 
+            tag, 
+            val: Object.assign(
+                  {}, 
+                  typeof JSON.parse(e.target.dataset.contextValue) === 'object' ? JSON.parse(e.target.dataset.contextValue) : {}, 
+                  { value: e.target.value }) 
           };
-          bc.postMessage(window.${namespace}.render(ctx, e.target.dataset.contextTarget));
+
+          let el = e.target.closest('[data-slot]');
+          if(el) {
+            ctx = { tag: el.dataset.slot, val: ctx };
+            el = el.closest('[data-slot]');
+          }
+
+          console.log({ctx});
+          let rendered = window.${namespace}.render(ctx); 
+          bc.postMessage(rendered);
         });
-      }`;
+      }
+`;
 }

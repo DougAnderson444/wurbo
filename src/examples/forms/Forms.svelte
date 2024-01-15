@@ -3,7 +3,7 @@
 	import * as wurbo from 'wurbo';
 
 	// Import wasm component bytes as a url
-	import wasmURL from '../../../target/wasm32-wasi/release/forms.wasm?url';
+	import wasmURL from '../../../target/wasm32-wasi/debug/forms.wasm?url';
 
 	// get imports from +page.svelte
 	export let buildCodeString;
