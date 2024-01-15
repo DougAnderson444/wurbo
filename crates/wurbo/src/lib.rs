@@ -3,6 +3,7 @@
 #![doc = include_str!("../README.md")]
 
 pub mod jinja;
+pub mod pest;
 pub mod utils;
 
 /// Prelude to ensure all users have the required deps

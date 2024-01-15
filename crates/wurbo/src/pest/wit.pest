@@ -1,5 +1,6 @@
 // a WIT file incluces a package at least one world, and optionally interfaces
-file = { SOI ~ package ~ interface* ~ ANY* ~ EOI }
+file = _{ SOI ~ contents ~ ANY* ~ EOI }
+contents = { package ~ interface* }
 
 package = { "package" ~ package_name ~ ";" }
 package_name = { name ~ ":" ~ name ~ ("@" ~ package_version)? }
