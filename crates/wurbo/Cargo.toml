@@ -17,4 +17,11 @@ authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 lazy_static = "1.4.0"
 nanoid = "0.4.0"
 thiserror = "1.0"
-minijinja = { version = "1.0.11" }
+minijinja = { version = "1.0.11", features = ["json"] }
+serde = { version = "1.0.130" }
+serde_json = "1.0.68"
+
+pest = "2.6"
+pest_derive = "2.6"
+
+wit-parser = "0.13.1"
