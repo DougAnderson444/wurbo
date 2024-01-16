@@ -48,6 +48,7 @@ pub struct PageContext {
     page: Page,
     input: Input,
     output: Output,
+    target: Option<String>,
 }
 
 impl StructObject for PageContext {
@@ -80,6 +81,7 @@ impl From<types::Content> for PageContext {
             page: Page::from(context.page),
             input: Input::from(context.input),
             output: Output::from(context.output),
+            target: None, // use default
         }
     }
 }
