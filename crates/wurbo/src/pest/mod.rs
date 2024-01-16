@@ -82,8 +82,7 @@ fn parse_pair(pair: Pair<Rule>) -> ContextValue {
         }
         Rule::wit_type => {
             println!("\n*** wit_type: {:?}", pair);
-            let mut inner = pair.as_str().to_string();
-            ContextValue::Type(inner)
+            ContextValue::Type(pair.as_str().to_string())
         }
         Rule::package => {
             println!("\n*** package: {:?}", pair);
