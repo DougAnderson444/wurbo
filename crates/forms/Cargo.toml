@@ -15,4 +15,9 @@ crate-type = ["cdylib"]
 [package.metadata.component]
 package = "component:forms"
 
+# It's not documented, but you can use `package.metadata.component.bindings` to
+# set additional derive attributes for the generated bindings:
+[package.metadata.component.bindings]
+derives = []
+
 [package.metadata.component.dependencies]
