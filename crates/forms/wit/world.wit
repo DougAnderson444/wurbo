@@ -63,7 +63,7 @@ interface wurbo-out {
 
   // renders the initial Web component with the given data
   // and the target template to use as top level entry point
-  render: func(ctx: context, target: string) -> result<string, string>;
+  render: func(ctx: context) -> result<string, string>;
 
   // activate listening 
   activate: func(selectors: option<list<string>>);
