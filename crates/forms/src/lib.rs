@@ -22,11 +22,13 @@ use wurbo::prelude_bindgen;
 /// The struct for the bound component that implements the Guest traits
 struct Component;
 
+const OUTPUT_HTML: &str = "output.html";
+
 /// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
         Index::new("page.html", include_str!("templates/page.html")),
-        Entry::new("output.html", include_str!("templates/output.html")),
+        Entry::new(OUTPUT_HTML, include_str!("templates/output.html")),
         Rest::new(vec![
             Entry::new("input.html", include_str!("templates/input.html")),
             Entry::new("username.html", include_str!("templates/username.html")),
@@ -45,6 +47,7 @@ pub struct PageContext {
     page: Page,
     input: Input,
     pub(crate) output: Output,
+    target: Option<String>,
 }
 
 impl StructObject for PageContext {
@@ -83,6 +86,8 @@ impl From<types::Content> for PageContext {
             // We can use default for Output because the minijinja StructObject impl will
             // calculate the values from the above inouts for us
             output: Output::default(),
+            // No override for target, use the default
+            target: None,
         }
     }
 }
@@ -103,4 +108,12 @@ impl From<output::Password> for PageContext {
         state.output.password = password;
         state
     }
+}
+
+#[cfg(test)]
+mod test_forms_ui {
+    use super::*;
+
+    #[test]
+    fn test_get_context_fields() {}
 }
