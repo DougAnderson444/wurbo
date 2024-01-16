@@ -207,12 +207,24 @@ macro_rules! prelude_bindgen {
         }
 
         impl $guest for $component {
-            fn render(context: $context, target: String) -> Result<String, String> {
+            fn render(context: $context) -> Result<String, String> {
                 // TODO: pass in the templates to the macro.
                 let templates = get_templates();
                 let page_context = $pagecontext::from(&context);
                 // update cache
                 let mut last_state = $state.lock().unwrap();
+
+                let target = if let Some(ref target) = page_context.target {
+                    // if target is Some, then use that as the target minijinja template
+                    target
+                } else if last_state.is_none() {
+                    // if last_state is None, then use the entry minijinja template
+                    templates.entry.name
+                } else {
+                    // if last_state is Some, but no override set, then use the output minijinja template
+                    templates.output.name
+                };
+
                 *last_state = Some(page_context.clone());
 
                 let ctx = Value::from_struct_object(page_context.clone());
@@ -248,7 +260,7 @@ macro_rules! prelude_bindgen {
 
 #[cfg(test)]
 mod jinja_unit_tests {
-    use super::*;
+    // use super::*;
 
     #[test]
     fn smoke() -> Result<(), Box<dyn std::error::Error>> {
