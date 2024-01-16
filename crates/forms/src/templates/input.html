@@ -8,25 +8,26 @@
 		<div class="flex-1">
 			<div class="flex-1">Username:</div>
 			<div class="flex-1">
+				<!-- 1) input.username_input, 2) context name 3) kwargs: ie. tagvals-->
 				<input
-					id="{{ input.username_input|on('keyup') }}"
-					name="username"
+					id="{{ input.username_input.id|on('keyup') }}"
+					data-context-name="username"
+					data-context-value='{{ input.username_input|extend(tag="key", val=0) }}'
 					class="rounded border border-blue-400 bg-blue-100 text-neutral-700 p-2 m-2 placeholder:Enter"
 					placeholder="{{input.placeholder}}"
-					data-context-target="output.html"
+					type="text"
 				/>
 			</div>
 		</div>
 		<div class="flex-1">
-			<div class="flex-1">Password:</div>
+			<div class="flex-1">Password Input:</div>
 			<div class="flex-1">
 				<input
-					id="{{ input.password_input|on('keyup') }}"
-					type="password"
-					name="password"
-					data-content="password"
+					id="{{ input.password_input.id|on('keyup') }}"
+					data-context-name="password"
+					data-context-value="{{ input.password_input.target|tojson }}"
 					class="rounded border border-blue-400 bg-red-100 text-neutral-700 p-2 m-2 placeholder:Enter"
-					data-context-target="output.html"
+					type="password"
 				/>
 			</div>
 		</div>
