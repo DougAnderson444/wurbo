@@ -29,11 +29,24 @@ export class Listener {
 					// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
 					// First, get all the id attributes from the event.data HTML
 					let matching_ids = event.data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
-					mod.wurboOut.activate(matching_ids);
+
+					try {
+						mod?.wurboOut?.activate(matching_ids);
+					} catch (e) {
+						console.warn('No activate function for module: ', mod);
+					}
+
+					// In case Wurbo is being used with an aggregation module, we need to call aggregation.activates()
+					try {
+						mod?.aggregation?.activates(matching_ids);
+					} catch (e) {
+						console.info('Not an aggregation module. No aggregation.activates function found.');
+					}
+
 					return;
 				}
 			}
-			console.warn(`No element found with id=${id} in ctx: \n ${event.data}`);
+			console.info(`No element found with id=${id} in ctx: \n ${event.data}`);
 
 			let ctx = JSON.parse(event.data);
 
