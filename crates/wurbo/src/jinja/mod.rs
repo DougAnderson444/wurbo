@@ -195,13 +195,11 @@ macro_rules! prelude_bindgen {
 
                 // print warning if elem_id string is empty for listener type 'ty'
                 if elem_id.is_empty() {
-                    eprintln!("WARNING: elem_id is empty for listener type '{}'", ty);
+                    eprintln!("WARNING: elem_id is empty for listener type {ty}");
+                } else {
+                    listeners.insert(format!("#{elem_id}"), ty);
                 }
 
-                // This is how you specify a selector that is the id_child of the parent with
-                // id_parent:
-                // let selector = format!("#{} #{}", id_parent, id_child);
-                listeners.insert(format!("#{elem_id}"), ty);
                 elem_id
             }
         }
