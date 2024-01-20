@@ -481,7 +481,7 @@ dependencies = [
 
 [[package]]
 name = "wurbo"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "lazy_static",
  "minijinja",
