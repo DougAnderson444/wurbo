@@ -17,10 +17,6 @@ interface types {
     placeholder: string
   }
 
-  record outrecord {
-    value: string,
-  }
-
   record output {
     value: string,
     // optional id string: None is intial render, Some for update value
@@ -38,7 +34,7 @@ interface types {
   // Context variants
   variant context {
     all-content(content),
-    phrase(outrecord)
+    phrase(string)
   }
 
 }

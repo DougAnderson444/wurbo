@@ -7,9 +7,8 @@ pub(crate) struct Input(types::Input);
 impl StructObject for Input {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
+            "id" => Some(Value::from(rand_id())),
             "placeholder" => Some(Value::from(self.placeholder.clone())),
-            "username_input" => Some(Value::from(rand_id())),
-            "password_input" => Some(Value::from(rand_id())),
             _ => None,
         }
     }

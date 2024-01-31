@@ -1,5 +1,3 @@
-cargo_component_bindings::generate!();
-
 use std::ops::Deref;
 
 use wurbo::jinja::{Entry, Index, Rest, Templates};
@@ -8,6 +6,7 @@ use wurbo::prelude_bindgen;
 // mod components;
 // mod input;
 // mod output;
+mod bindings;
 mod count;
 mod utils;
 
@@ -70,7 +69,7 @@ impl From<&types::Context> for PageContext {
     fn from(context: &types::Context) -> Self {
         match context {
             types::Context::AllContent(c) => PageContext::from(c.clone()),
-            types::Context::Phrase(p) => PageContext::from(Phrase::from(p)),
+            types::Context::Phrase(p) => PageContext::from(Phrase::from(p.clone())),
         }
     }
 }
@@ -214,19 +213,19 @@ impl From<Option<types::Output>> for Output {
 impl From<Phrase> for Output {
     fn from(context: Phrase) -> Self {
         Output {
-            value: context.value.clone(),
+            value: context.to_string(),
             ..Default::default()
         }
     }
 }
 
 #[derive(Debug, Default, Clone)]
-struct Phrase(Option<types::Outrecord>);
+struct Phrase(Option<String>);
 
 impl StructObject for Phrase {
     fn get_field(&self, name: &str) -> Option<Value> {
         match name {
-            "phrase" => Some(Value::from(self.value.clone())),
+            "phrase" => Some(Value::from(self.deref().clone())),
             _ => None,
         }
     }
@@ -237,20 +236,20 @@ impl StructObject for Phrase {
     }
 }
 
-impl From<&types::Outrecord> for Phrase {
-    fn from(context: &types::Outrecord) -> Self {
+impl From<String> for Phrase {
+    fn from(context: String) -> Self {
         Phrase(Some(context.clone()))
     }
 }
 
-impl From<Option<types::Outrecord>> for Phrase {
-    fn from(context: Option<types::Outrecord>) -> Self {
+impl From<Option<String>> for Phrase {
+    fn from(context: Option<String>) -> Self {
         Phrase(context)
     }
 }
 
 impl Deref for Phrase {
-    type Target = types::Outrecord;
+    type Target = String;
 
     fn deref(&self) -> &Self::Target {
         self.0.as_ref().unwrap()

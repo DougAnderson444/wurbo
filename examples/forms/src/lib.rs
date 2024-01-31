@@ -1,5 +1,4 @@
-cargo_component_bindings::generate!();
-
+mod bindings;
 mod input;
 mod output;
 mod page;
@@ -71,8 +70,8 @@ impl From<&types::Context> for PageContext {
         // Output is not a type of context, because it is calculated from the other values
         match context {
             types::Context::AllContent(c) => PageContext::from(c.clone()),
-            types::Context::Username(u) => PageContext::from(output::Username::from(u)),
-            types::Context::Password(p) => PageContext::from(output::Password::from(p)),
+            types::Context::Username(u) => PageContext::from(output::Username::from(u.to_owned())),
+            types::Context::Password(p) => PageContext::from(output::Password::from(p.to_owned())),
         }
     }
 }
