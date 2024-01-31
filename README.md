@@ -8,10 +8,23 @@ Wurbo? Like [Turbo](https://github.com/hotwired/turbo), but using [Wasm Componen
 
 [![Wurbo Demo](https://i.ytimg.com/vi/x2ooLUTYuQk/oar2.jpg?sqp=-oaymwEaCN0CENAFSFXyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLAyYw1c2XvGjZwgVg1RdG_mjE7s9Q)](https://www.youtube.com/shorts/x2ooLUTYuQk)
 
-## Example
+## Examples
 
-- Example Guest component is [`crates/vowels`](./crates/vowels/src/lib.rs)
+- Example Guest component is [`examples/vowels`](./examples/vowels/src/lib.rs)
+- Example Forms component is [`examples/forms`](./examples/forms/src/lib.rs)
 - Example Host app is [`src/routes/+page.svelte`](./src/routes/+page.svelte)
+
+To run the examples locally in the browser, you can use the following commands:
+
+```bash
+# build-component:
+  cargo component build --workspace
+
+# prev: build-component
+  npm run build && npm run preview -- --open
+```
+
+or using [just](https:://just.systems): `just prev`
 
 ## Demo
 
