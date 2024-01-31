@@ -56,7 +56,6 @@ export class Listener {
 			if (dom(event.data)) return;
 
 			let parsed = JSON.parse(event.data);
-			console.log({ parsed });
 
 			// The other type of BroadcastChannel message is an event message, which wurbo
 			// re-broadcasts via wurboOut.render(data). The components detect this
