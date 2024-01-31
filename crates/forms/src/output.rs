@@ -41,7 +41,7 @@ impl StructObject for Output {
             // self.username.value
             "count" => Some(Value::from(self.calculate())),
             // if self.id.is_some, use it, otherwise generate a new one
-            "id" => Some(Value::from(self.id.clone().unwrap_or(utils::rand_id()))),
+            "id" => Some(Value::from(self.id.clone().unwrap_or(rand_id()))),
             _ => None,
         }
     }
