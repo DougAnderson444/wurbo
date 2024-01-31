@@ -16,69 +16,56 @@ export class Listener {
 
 		// Listen for messages from the Blob URLs
 		bc.onmessage = (event) => {
+			let data = event.data;
 			// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
-			let id =
-				new DOMParser().parseFromString(event.data || '', 'text/html')?.body?.firstElementChild
-					?.id || null;
-			// if the id is not null, then we can update the html with the new string
-			if (id) {
-				let chosen = document.getElementById(id);
-				if (chosen) {
-					// @ts-ignore
-					chosen.outerHTML = event.data;
-					// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
-					// First, get all the id attributes from the event.data HTML
-					let matching_ids = event.data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
+			// Note: The top level element must have an id attribute! So we know what to replace
+			function dom(data) {
+				let id =
+					new DOMParser().parseFromString(data || '', 'text/html')?.body?.firstElementChild?.id ||
+					null;
+				// if the id is not null, then we can update the html with the new string
+				if (id) {
+					let chosen = document.getElementById(id);
+					if (chosen) {
+						// @ts-ignore
+						chosen.outerHTML = data;
+						// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
+						// First, get all the id attributes from the data HTML
+						let matching_ids = data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
 
-					try {
-						mod?.wurboOut?.activate(matching_ids);
-					} catch (e) {
-						console.warn('No activate function for module: ', mod);
-					}
+						try {
+							mod?.wurboOut?.activate(matching_ids);
+						} catch (e) {
+							console.warn('No activate function for module: ', mod);
+						}
 
-					// In case Wurbo is being used with an aggregation module, we need to call aggregation.activates()
-					try {
-						mod?.aggregation?.activates(matching_ids);
-					} catch (e) {
-						console.info('Not an aggregation module. No aggregation.activates function found.');
-					}
+						// In case Wurbo is being used with an aggregation module, we need to call aggregation.activates()
+						try {
+							mod?.aggregation?.activates(matching_ids);
+						} catch (e) {
+							console.info('Not an aggregation module. No aggregation.activates function found.');
+						}
 
-					return;
-				}
-			}
-			console.info(`No element found with id=${id} in ctx: \n ${event.data}`);
-
-			let ctx = JSON.parse(event.data);
-
-			// recursively convert any arrays to Uint8Arrays
-			// because WIT expects TypedArrays, and we're only going to deal with `list<u8>` for now
-			function convertArrays(obj) {
-				for (let key in obj) {
-					if (obj[key] instanceof Array) {
-						obj[key] = new Uint8Array(obj[key]);
-					} else if (typeof obj[key] === 'object') {
-						convertArrays(obj[key]);
+						return true;
 					}
 				}
+				console.info(`No element found with id=${id} in ctx: \n ${data}`);
+				return false;
 			}
 
-			// check if ctx is a valid JavaScript object
-			if (!ctx || typeof ctx !== 'object') {
-				console.warn('ctx is not a valid JavaScript object', event.data);
-				ctx = event.data;
-			} else {
-				convertArrays(ctx);
-			}
+			if (dom(event.data)) return;
 
 			// The other type of BroadcastChannel message is an event message, which wurbo
-			// re-broadcasts via wurboOut.render(event.data). The components detect this
+			// re-broadcasts via wurboOut.render(data). The components detect this
 			// serialized message, deserde it into a Context and route it accordingly. Which means
 			// the sender needs the Context type of the recipient and serde into that type. This is going
 			// to work for both the JS runner and Rust Serde components. For example, if you want to put all
 			// state changes in the #url hash, then listen on the BroadcastChannel in JS and change the hash.
 			try {
 				// Not all components will have listeners, so we wrap this in a try/catch to avoid ugly errors
-				mod.wurboOut.render(ctx);
+				let rendered = mod.wurboOut.render(event.data);
+				// in case this event refreshes the DOM, we use the new HTML to update the DOM
+				dom(rendered);
 			} catch (e) {
 				console.warn('No listener found for event: ', event.data);
 			}
