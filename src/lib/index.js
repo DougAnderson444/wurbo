@@ -67,7 +67,7 @@ export class Listener {
 				// in case this event refreshes the DOM, we use the new HTML to update the DOM
 				dom(rendered);
 			} catch (e) {
-				console.warn('No listener found for event: ', event.data);
+				console.warn('No listener found for event: ', event.data, e);
 			}
 		};
 	}
