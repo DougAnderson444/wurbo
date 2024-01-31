@@ -55,6 +55,9 @@ export class Listener {
 
 			if (dom(event.data)) return;
 
+			let parsed = JSON.parse(event.data);
+			console.log({ parsed });
+
 			// The other type of BroadcastChannel message is an event message, which wurbo
 			// re-broadcasts via wurboOut.render(data). The components detect this
 			// serialized message, deserde it into a Context and route it accordingly. Which means
@@ -63,7 +66,7 @@ export class Listener {
 			// state changes in the #url hash, then listen on the BroadcastChannel in JS and change the hash.
 			try {
 				// Not all components will have listeners, so we wrap this in a try/catch to avoid ugly errors
-				let rendered = mod.wurboOut.render(event.data);
+				let rendered = mod.wurboOut.render(parsed);
 				// in case this event refreshes the DOM, we use the new HTML to update the DOM
 				dom(rendered);
 			} catch (e) {
