@@ -21,7 +21,7 @@
 	{#if load}
 		{#each examples as example}
 			<div>
-				<svelte:component this={example} {load} {buildCodeString} />
+				<svelte:component this={example} {load} buildCodeString={wurbo.buildCodeString} />
 			</div>
 		{/each}
 	{/if}

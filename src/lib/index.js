@@ -15,7 +15,7 @@ export class Listener {
 		const bc = new BroadcastChannel(this.namespace);
 
 		// Listen for messages from the Blob URLs
-		bc.onmessage = (event) => {
+		bc.onmessage = async (event) => {
 			let data = event.data;
 			// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
 			// Note: The top level element must have an id attribute! So we know what to replace
