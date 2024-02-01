@@ -1,6 +1,6 @@
 {
 	"name": "wurbo",
-	"version": "0.1.9",
+	"version": "0.2.0",
 	"license": "MIT",
 	"author": "DougAnderson444 <DougAnderson444@gmail.com>",
 	"description": "A tiny front-end framework for webassembly components",
@@ -34,6 +34,7 @@
 		"@sveltejs/adapter-static": "^2.0.2",
 		"@sveltejs/kit": "^1.20.4",
 		"autoprefixer": "^10.4.14",
+		"esm-env": "^1.0.0",
 		"postcss": "^8.4.24",
 		"prettier": "^2.8.0",
 		"prettier-plugin-svelte": "^2.10.1",

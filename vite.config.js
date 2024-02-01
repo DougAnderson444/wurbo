@@ -11,5 +11,13 @@ export default defineConfig({
 		alias: {
 			$examples: '/src/examples'
 		}
+	},
+	// worker format
+	worker: {
+		format: 'es'
+	},
+	// build.minify false
+	build: {
+		minify: false
 	}
 });

@@ -1,13 +1,9 @@
 <script>
 	import { onMount, tick } from 'svelte';
-	import * as wurbo from 'wurbo';
+	import { Wurbo, wurboIn } from 'wurbo';
 
 	// Import wasm component bytes as a url
 	import wasmURL from '../../../target/wasm32-wasi/debug/vowels.wasm?url';
-
-	// get imports from +page.svelte
-	export let buildCodeString;
-	export let load;
 
 	/**
 	 * The rendered component as a string of HTML
@@ -19,22 +15,17 @@
 	 *
 	 * @type {{ render: (arg0: string) => string | null; listen: () => void; }}
 	 */
-	let mod;
+	let wurbo;
 
 	onMount(async () => {
-		// ensure you are in the Browser environment to rollup your WIT Component
-		// const { load } = await import('rollup-plugin-wit-component');
-
-		let listener = new wurbo.Listener();
-
 		// get your wasm bytes from your storage source
 		let wasmBytes = await fetch(wasmURL).then((res) => res.arrayBuffer());
 
 		// define the import handles you are giving to your component
-		let importables = [{ 'demo:vowels/wurbo-in': buildCodeString(listener.namespace) }];
+		let importables = [{ 'demo:vowels/wurbo-in': wurboIn }];
 
 		// load the import handles into the Wasm component and get the ES module returned
-		mod = await load(wasmBytes, importables);
+		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables });
 
 		// call `render` with your inputs for the component
 		let data = {
@@ -45,19 +36,16 @@
 				output: { value: 'vowels' }
 			}
 		};
-		renderedHTML = mod.wurboOut.render(data, 'page.html');
-
-		// lisen for events from the component
-		listener.listen(mod);
+		renderedHTML = await wurbo.render(data);
 	});
 
 	// Once the HTML is rendered and the module is loaded, we can activate the event emitters
-	$: if (renderedHTML && mod)
+	$: if (renderedHTML && wurbo)
 		(async () => {
 			// wait for the DOM to reflect the updates first
 			await tick();
 			// once the DOM has our elements loaded, we can activate the event emitters
-			mod.wurboOut.activate();
+			wurbo.activate();
 		})();
 </script>
 
