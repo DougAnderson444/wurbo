@@ -48,8 +48,14 @@ export class Wurbo {
 		return this.post('render', ctx);
 	}
 
-	activate(selectors = null) {
+	// activate the css selectors
+	async activate(selectors = null) {
 		return this.post('activate', selectors);
+	}
+
+	// aggregation.activates (plural) CSS selectors
+	async aggregation(selectors = null) {
+		return this.post('aggregation', selectors);
 	}
 
 	// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
