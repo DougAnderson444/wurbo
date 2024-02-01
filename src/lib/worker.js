@@ -8,30 +8,23 @@ let mod;
 async function init() {
 	if (BROWSER) {
 		({ load } = await import('rollup-plugin-wit-component'));
-		console.log('wasm ready', { load });
 	}
 }
 
-init();
+let initPromise = init();
 
 // set up web worker messaging
 onmessage = async (e) => {
 	const { action, payload } = e.data;
 	let rendered;
 
-	// loop until load function has been initialized
-	while (!load) {
-		await new Promise((resolve) => setTimeout(resolve, 100));
-	}
+	await initPromise;
 
 	switch (action) {
 		// takes the payload { arrayBuffer, importables} and loads them using load() from rollup-plugin-wit-component
 		case 'load':
 			try {
-				console.time('load');
 				mod = await load(payload.arrayBuffer, payload.importables);
-				console.timeEnd('load');
-				console.log('modules loaded.', mod);
 			} catch (e) {
 				console.error('Error loading', e);
 			}
