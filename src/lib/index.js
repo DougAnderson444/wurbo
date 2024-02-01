@@ -12,22 +12,29 @@ export class Wurbo {
 
 		// helper function to post message to worker and process responses
 		this.post = (action, payload) => {
+			// create a message id to track each response, in case there are multiple requests with the same action
+			// this is useful for the render method, which can be called multiple times
+			// and we want to make sure we are getting the correct response for each request
+			const messageId = Math.random().toString(36).slice(2);
+			console.time(action + ' - ' + messageId);
+			// post a message to the worker with the action and payload
+			// and the message id to track the response
+			// the worker will respond with the same message id, so we can match the response to the request
+			// and resolve the promise with the payload
 			return new Promise((resolve) => {
 				const handler = (e) => {
-					if (e.data.action === action) {
+					if (e.data.action === action && e.data.messageId === messageId) {
 						resolve(e.data.payload);
+						console.timeEnd(action + ' - ' + messageId);
 						worker.removeEventListener('message', handler);
 					}
 				};
 				worker.onmessage = handler;
-				worker.postMessage({ action, payload });
+				worker.postMessage({ action, payload, messageId });
 			});
 		};
 
 		// Message event listener for 'other' messages emitted from the worker
-		// 1) Add event listener: { action: 'addeventlistener', payload: { selector, ty } }
-		// 2) Set Hash: { action: 'setHash', payload: hash }
-		// 3) Emit: { action: 'emit', payload: message } (calls this.dom(message)
 		worker.addEventListener('message', (e) => {
 			let { action, payload } = e.data;
 			switch (action) {
@@ -91,7 +98,7 @@ export class Wurbo {
 					return true;
 				}
 			}
-			console.info(`No element found with id=${id} in ctx: \n ${data}`);
+			console.info(`No element found with id in ctx: \n ${data}`);
 			return false;
 		};
 

@@ -15,7 +15,7 @@ let initPromise = init();
 
 // set up web worker messaging
 onmessage = async (e) => {
-	const { action, payload } = e.data;
+	const { action, payload, messageId } = e.data;
 	let rendered;
 
 	await initPromise;
@@ -86,7 +86,7 @@ onmessage = async (e) => {
 		default:
 			break;
 	}
-	postMessage({ action, payload: rendered });
+	postMessage({ action, payload: rendered, messageId });
 };
 
 // Function to asset that mod has loaded
