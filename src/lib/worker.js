@@ -88,16 +88,3 @@ onmessage = async (e) => {
 	}
 	postMessage({ action, payload: rendered, messageId });
 };
-
-// Function to asset that mod has loaded
-async function assertVal(cond) {
-	let i = 0;
-	while (!cond) {
-		if (i > 10) {
-			console.warn('Condition not met');
-			break;
-		}
-		await new Promise((resolve) => setTimeout(resolve, 100));
-		i++;
-	}
-}
