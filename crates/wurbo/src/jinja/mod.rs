@@ -183,13 +183,6 @@ macro_rules! prelude_bindgen {
         /// unique namespace to clairfy and avoid collisions with other Guest code
         mod wurbo_tracker {
             /// Insert the source element id, event type, and target output id into the LISTENERS_MAP
-            ///
-            /// # Example
-            ///
-            /// ```rust
-            /// let my_CSS_selector = "#some_selector";
-            /// wurbo_tracker::track(format!("#{my_CSS_selector}"), "keyup");
-            /// ```
             pub fn track(elem_id: String, ty: String) -> String {
                 let mut listeners = super::LISTENERS_MAP.lock().unwrap();
 
