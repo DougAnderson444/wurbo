@@ -16,7 +16,8 @@ export class Wurbo {
 			// this is useful for the render method, which can be called multiple times
 			// and we want to make sure we are getting the correct response for each request
 			const messageId = Math.random().toString(36).slice(2);
-			console.time(action + ' - ' + messageId);
+			// console.time(action + ' - ' + messageId);
+			//
 			// post a message to the worker with the action and payload
 			// and the message id to track the response
 			// the worker will respond with the same message id, so we can match the response to the request
@@ -25,7 +26,7 @@ export class Wurbo {
 				const handler = (e) => {
 					if (e.data.action === action && e.data.messageId === messageId) {
 						resolve(e.data.payload);
-						console.timeEnd(action + ' - ' + messageId);
+						//console.timeEnd(action + ' - ' + messageId);
 						worker.removeEventListener('message', handler);
 					}
 				};
