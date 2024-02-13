@@ -99,7 +99,7 @@ export class Wurbo {
 					return true;
 				}
 			}
-			console.info(`No element found with id in ctx: \n ${data}`);
+			console.info(`No element found with id in ctx`);
 			return false;
 		};
 
@@ -160,7 +160,6 @@ export class Wurbo {
 				el = el.closest('[data-slot]');
 			}
 
-			// console.log({ctx});
 			let rendered = await this.post('render', ctx);
 			this.dom(rendered);
 		});
@@ -177,6 +176,7 @@ export const wurboIn = `
       }
 
       export function emit(message) {
+        console.log('worker emit');
         postMessage({ action: 'emit', payload: message });
       }
 
