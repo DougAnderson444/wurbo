@@ -118,13 +118,13 @@ export class Wurbo {
 			await updateHTML(rendered);
 		} catch (e) {
 			console.warn('No listener found for event: ', event.data, e);
-      // If the data is not a stringified JSON object, then try to pass it as a string (base64)
-      try {
-        let rendered = await this.post('render', data);
-        await updateHTML(rendered);        
-      } catch () {
-        
-      }
+			// If the data is not a stringified JSON object, then try to pass it as a string (base64)
+			try {
+				let rendered = await this.post('render', data);
+				await updateHTML(rendered);
+			} catch (e) {
+				console.trace('Cannot render object or string for event', event.data, e);
+			}
 		}
 	}
 
