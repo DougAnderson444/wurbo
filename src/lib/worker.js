@@ -43,7 +43,8 @@ onmessage = async (e) => {
 			try {
 				rendered = await mod.wurboOut.render(payload);
 			} catch (e) {
-				console.error('Error rendering', e);
+				console.warn('Cannot render: ', e);
+				break;
 			}
 			break;
 		// mod.wurboOut.activate(selectors ids)
@@ -63,6 +64,7 @@ onmessage = async (e) => {
 				mod.wurboOut.activate(payload);
 			} catch (e) {
 				console.warn('No activate function for module.');
+				break;
 			}
 			break;
 		// mod?.aggregation?.activates(matching_ids)
