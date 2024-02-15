@@ -3,7 +3,7 @@
 export class Wurbo {
 	// takes the given arrayBuffer and importables string and creates the WebWorker,
 	// using transferable objects to avoid copying the arrayBuffer
-	constructor({ arrayBuffer, importables }) {
+	constructor({ arrayBuffer, importables }, externalEventHandler = (p) => {}) {
 		// create a new WebWorker with the current file path
 		const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
 
@@ -46,7 +46,10 @@ export class Wurbo {
 					window.location.hash = payload;
 					break;
 				case 'emit':
+					// internal event handler updates the DOM
 					this.dom(payload);
+					// optionally send event data out by calling an external event handler that processes the payload too
+					externalEventHandler(payload);
 					break;
 			}
 		});
@@ -66,65 +69,79 @@ export class Wurbo {
 		return this.post('aggregation', selectors);
 	}
 
+	// Attempts to update the HTML of the current document with the given string
+	async updateHTML(data) {
+		let id =
+			new DOMParser().parseFromString(data || '', 'text/html')?.body?.firstElementChild?.id || null;
+		// if the id is not null, then we can update the html with the new string
+		if (id) {
+			let chosen = document.getElementById(id);
+			if (chosen) {
+				// @ts-ignore
+				chosen.outerHTML = data;
+				// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
+				// First, get all the id attributes from the data HTML
+				let matching_ids = data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
+
+				try {
+					await this.post('activate', matching_ids);
+				} catch (e) {
+					console.warn('No activate function for module');
+				}
+
+				// In case Wurbo is being used with an aggregation module, we need to call aggregation.activates()
+				try {
+					await this.post('aggregation', matching_ids);
+				} catch (e) {
+					console.info('Not an aggregation module. No aggregation.activates function found.');
+				}
+
+				return true;
+			}
+		}
+		console.info(`No element found with id in ctx`);
+		return false;
+	}
+
 	// create an HTMLElement from the string, then extract the top most element id from the HTMLElement
 	// Note: The top level element must have an id attribute! So we know what to replace
 	async dom(data) {
-		const updateHTML = async (data) => {
-			let id =
-				new DOMParser().parseFromString(data || '', 'text/html')?.body?.firstElementChild?.id ||
-				null;
-			// if the id is not null, then we can update the html with the new string
-			if (id) {
-				let chosen = document.getElementById(id);
-				if (chosen) {
-					// @ts-ignore
-					chosen.outerHTML = data;
-					// if there are any event targets in this HTML, then we need to re-call mod.wurboOut.activate()
-					// First, get all the id attributes from the data HTML
-					let matching_ids = data.match(/id="[^"]*"/g)?.map((id) => '#' + id.slice(4, -1));
-
-					try {
-						await this.post('activate', matching_ids);
-					} catch (e) {
-						console.warn('No activate function for module');
-					}
-
-					// In case Wurbo is being used with an aggregation module, we need to call aggregation.activates()
-					try {
-						await this.post('aggregation', matching_ids);
-					} catch (e) {
-						console.info('Not an aggregation module. No aggregation.activates function found.');
-					}
-
-					return true;
-				}
-			}
-			console.info(`No element found with id in ctx`);
-			return false;
-		};
-
 		// The first type of render request is a String of HTML:
-		if (await updateHTML(data)) return;
+		if (await this.updateHTML(data)) return;
 
 		// The other type of DOM access request is from an event message, stringified JSON object, which needs
 		// to be parsed into a JSON object first before it is rendered.
-		// This is for event listeners to handle the contents of the stringified JSON object, and then potentially update the DOM
+		// This is for event listeners to handle the contents of the stringified JSON object,
+		// and then potentially update the DOM
+		await this.eventHandler(data);
+	}
+
+	// Handles event messages that do NOT update the DOM, but are meant to be passed
+	// to the component via their render function. Only update DOM with optional retrun value
+	// from that component.
+	//
+	// Can be used by external logic by calling `await wurbo.eventHandler(payload)` in
+	// order to pass data into the components.
+	async eventHandler(data) {
 		try {
-			let parsed = JSON.parse(data);
+			// if data is JS object, it's parsed already, if it's a string, parse it
+			let parsed = typeof data === 'object' ? data : JSON.parse(data);
 			// Not all components will have listeners, so we wrap this in a try/catch to avoid ugly errors
 			// let rendered = mod.wurboOut.render(parsed);
 			let rendered = await this.post('render', parsed);
 			// in case this event refreshes the DOM, we use the new HTML to update the DOM
-			await updateHTML(rendered);
+			await this.updateHTML(rendered);
+			return;
 		} catch (e) {
-			console.warn('No listener found for event: ', event.data, e);
-			// If the data is not a stringified JSON object, then try to pass it as a string (base64)
-			try {
-				let rendered = await this.post('render', data);
-				await updateHTML(rendered);
-			} catch (e) {
-				console.trace('Cannot render object or string for event', event.data, e);
-			}
+			console.warn('No listener found for event: ', data, e);
+		}
+
+		// If the data is not a stringified JSON object, then try to pass it as a string (base64)
+		try {
+			let rendered = await this.post('render', data);
+			await this.updateHTML(rendered);
+		} catch (e) {
+			console.trace('Cannot render object or string for event', data, e);
 		}
 	}
 
@@ -176,13 +193,12 @@ export const wurboIn = `
       }
 
       export function emit(message) {
-        console.log('worker emit');
         postMessage({ action: 'emit', payload: message });
       }
 
       // Set hash of the current window to the given value
       export function setHash(hash) {
-        // window.location.hash = hash;
+        // window.location.hash
         postMessage({ action: 'setHash', payload: hash });
       }
 `;
