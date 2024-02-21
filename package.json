@@ -1,6 +1,6 @@
 {
 	"name": "wurbo",
-	"version": "0.2.7",
+	"version": "0.2.8",
 	"license": "MIT",
 	"author": "DougAnderson444 <DougAnderson444@gmail.com>",
 	"description": "A tiny front-end framework for webassembly components",
