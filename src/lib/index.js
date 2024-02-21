@@ -75,7 +75,6 @@ export class Wurbo {
 			new DOMParser().parseFromString(data || '', 'text/html')?.body?.firstElementChild?.id || null;
 		// if the id is not null, then we can update the html with the new string
 		if (id) {
-			console.log('DOM render id', id, { data });
 			let chosen = document.getElementById(id);
 			if (chosen) {
 				// @ts-ignore
