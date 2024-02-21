@@ -83,6 +83,7 @@ onmessage = async (e) => {
 				mod?.aggregation?.activates(payload);
 			} catch (e) {
 				console.warn('No aggregation.activates function for module: ', mod);
+				break;
 			}
 			break;
 		default:

@@ -10,27 +10,27 @@ export class Wurbo {
 		// post a message to the worker with the action 'load' and the payload { arrayBuffer, importables }
 		worker.postMessage({ action: 'load', payload: { arrayBuffer, importables } }, [arrayBuffer]);
 
-		// helper function to post message to worker and process responses
-		this.post = (action, payload) => {
-			// create a message id to track each response, in case there are multiple requests with the same action
-			// this is useful for the render method, which can be called multiple times
-			// and we want to make sure we are getting the correct response for each request
-			const messageId = Math.random().toString(36).slice(2);
-			// console.time(action + ' - ' + messageId);
-			//
+		// helper function to post message to worker, track and process responses
+		this.post = async (action, payload) => {
 			// post a message to the worker with the action and payload
-			// and the message id to track the response
 			// the worker will respond with the same message id, so we can match the response to the request
 			// and resolve the promise with the payload
 			return new Promise((resolve) => {
+				// create a message id to track each response, in case there are multiple requests with the same action
+				// this is useful for the render method, which can be called multiple times
+				// and we want to make sure we are getting the correct response for each request
+				const messageId = Math.random().toString(36).slice(2);
+				// console.time(action + ' - ' + messageId);
+
 				const handler = (e) => {
 					if (e.data.action === action && e.data.messageId === messageId) {
 						resolve(e.data.payload);
-						//console.timeEnd(action + ' - ' + messageId);
+						// console.timeEnd(action + ' - ' + messageId);
 						worker.removeEventListener('message', handler);
 					}
 				};
-				worker.onmessage = handler;
+				// add onmessage event listener to the worker
+				worker.addEventListener('message', handler);
 				worker.postMessage({ action, payload, messageId });
 			});
 		};
@@ -56,17 +56,17 @@ export class Wurbo {
 	}
 
 	async render(ctx) {
-		return this.post('render', ctx);
+		return await this.post('render', ctx);
 	}
 
 	// activate the css selectors
 	async activate(selectors = null) {
-		return this.post('activate', selectors);
+		return await this.post('activate', selectors);
 	}
 
 	// aggregation.activates (plural) CSS selectors
 	async aggregation(selectors = null) {
-		return this.post('aggregation', selectors);
+		return await this.post('aggregation', selectors);
 	}
 
 	// Attempts to update the HTML of the current document with the given string
@@ -75,6 +75,7 @@ export class Wurbo {
 			new DOMParser().parseFromString(data || '', 'text/html')?.body?.firstElementChild?.id || null;
 		// if the id is not null, then we can update the html with the new string
 		if (id) {
+			console.log('DOM render id', id, { data });
 			let chosen = document.getElementById(id);
 			if (chosen) {
 				// @ts-ignore
@@ -99,7 +100,7 @@ export class Wurbo {
 				return true;
 			}
 		}
-		console.info(`No element found with id in ctx`);
+		console.info(`No element id in ctx ${data}`);
 		return false;
 	}
 
