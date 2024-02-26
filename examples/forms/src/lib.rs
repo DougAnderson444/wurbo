@@ -22,16 +22,18 @@ use wurbo::prelude_bindgen;
 struct Component;
 
 const OUTPUT_HTML: &str = "output.html";
+const INDEX_HTML: &str = "index.html";
+const INPUT_HTML: &str = "input.html";
 
 /// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
-        Index::new("page.html", include_str!("templates/page.html")),
+        Index::new(INDEX_HTML, include_str!("templates/index.html")),
         Entry::new(OUTPUT_HTML, include_str!("templates/output.html")),
-        Rest::new(vec![
-            Entry::new("input.html", include_str!("templates/input.html")),
-            Entry::new("username.html", include_str!("templates/username.html")),
-        ]),
+        Rest::new(vec![Entry::new(
+            INPUT_HTML,
+            include_str!("templates/input.html"),
+        )]),
     );
     templates
 }

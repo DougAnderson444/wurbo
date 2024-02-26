@@ -58,6 +58,9 @@ interface wurbo-out {
 
   use types.{context};
 
+  // Optionally customize the configuration of the templates used to render the component
+  customize: func(templates: list<tuple<string, string>>) -> result<_, string>;
+
   // renders the initial Web component with the given data
   render: func(ctx: context) -> result<string, string>;
 

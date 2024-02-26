@@ -2,6 +2,10 @@
 	import { onMount, tick } from 'svelte';
 	import { Wurbo, wurboIn } from 'wurbo';
 
+	import index from './templates/index.html?raw';
+	import input from './templates/input.html?raw';
+	import output from './templates/output.html?raw';
+
 	// Import wasm component bytes as a url
 	import wasmURL from '../../../target/wasm32-wasi/debug/forms.wasm?url';
 
@@ -24,8 +28,17 @@
 		// define the import handles you are giving to your component
 		let importables = [{ 'demo:forms/wurbo-in': wurboIn }];
 
+		// We can pass in customized templates to the component
+		let templates = [
+			['index.html', index],
+			['input.html', input],
+			['output.html', output]
+		];
+
 		// load the import handles into the Wasm component and get the ES module returned
-		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables });
+		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables, templates }, (payload) => {
+			// we can optionally listen to the events emitted by the component here
+		});
 
 		// call `render` with your inputs for the component
 		let data = {

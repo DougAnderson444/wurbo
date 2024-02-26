@@ -25,6 +25,10 @@ onmessage = async (e) => {
 		case 'load':
 			try {
 				mod = await load(payload.arrayBuffer, payload.importables);
+				// if payload.templates, call mod.customize(templates)
+				if (payload?.templates) {
+					mod.wurboOut.customize(payload.templates);
+				}
 			} catch (e) {
 				console.error('Error loading', e);
 			}

@@ -1,0 +1,11 @@
+<div id="myoutput">
+	<!-- Can I pass output.username context to username.html, then have it call "props.value"?  -->
+	<!-- I could declare a variable and set it to output.username? -->
+	<div>Username value: <b>{{output.username.value}}</b></div>
+	<div>Password: <b>{{output.password.value}}</b></div>
+	<div>Concatonated value: {{output.value}}</div>
+	<div>
+		The length is: {% if output.count == 0 %} has no length. {% elif output.count == 1 %} has 1
+		char. {% else %} has <b>{{output.count}} characters</b>. {% endif %} <br />
+	</div>
+</div>

@@ -22,9 +22,16 @@ pub mod error;
 pub use minijinja::context;
 use minijinja::Environment;
 use minijinja::Value;
+use std::sync::LazyLock;
+use std::sync::Mutex;
+
+/// Use LazyLock and Mutex static to hold the latest Environment settings. Can be set by using the initialize
+/// function.
+pub static ENVIRO: LazyLock<Mutex<Environment>> = LazyLock::new(|| Mutex::new(Environment::new()));
 
 /// This struct and it's impls replaces the templates Vec with a type that identifies an Entry
 /// tuple,
+#[derive(Debug, Clone)]
 pub struct Templates {
     pub entry: Entry,
     pub output: Entry,
@@ -77,20 +84,24 @@ impl Deref for Rest {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Entry {
-    pub name: &'static str,
-    pub template: &'static str,
+    pub name: String,
+    pub template: String,
 }
 
 impl Entry {
     pub fn new(name: &'static str, template: &'static str) -> Self {
-        Self { name, template }
+        Self {
+            name: name.to_string(),
+            template: template.to_string(),
+        }
     }
 }
 
 /// Impl IntoIterator for Templates
 impl IntoIterator for Templates {
-    type Item = (&'static str, &'static str);
+    type Item = (String, String);
     type IntoIter = std::vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -104,41 +115,41 @@ impl IntoIterator for Templates {
     }
 }
 
-/// Indexes a string.
-/// # Example
-/// mystring -> mystring[42]
-fn indexify(given: String, index: usize) -> String {
-    format!("{given}[{index}]")
+/// Initialize the Environment with the given templates. Use default filters.
+pub fn customize<T>(
+    templates: T,
+    tracker: fn(String, String) -> String,
+) -> Result<(), error::RenderError>
+where
+    T: IntoIterator<Item = (String, String)> + std::fmt::Debug,
+{
+    // Get the env from ENV
+    let mut env = ENVIRO.lock().unwrap();
+
+    // Convert the
+    for (name, template) in templates.into_iter() {
+        env.add_template_owned(name, template)?;
+    }
+
+    env.add_filter("on", tracker);
+
+    Ok(())
 }
 
 /// Render the given entry filename with the given templates using the context
 /// Trackers will register any event listeners as per the templates' `on` attributes
 pub fn render(
-    entry: &str,
-    // The chosen template to update
-    templates: Templates,
-    // as long as ctx_struct implements StructObject, we can use it
+    // Template target for this rendering
+    target: &str,
     ctx: Value,
-    tracker: fn(String, String) -> String,
 ) -> Result<String, error::RenderError> {
-    let mut env = Environment::new();
-
-    for (name, template) in templates.into_iter() {
-        env.add_template(name, template)
-            .expect("template should be added");
-    }
-
-    env.add_filter("on", tracker);
-    env.add_filter("append", indexify);
-
-    let tmpl = env.get_template(entry)?;
+    let env = ENVIRO.lock().unwrap();
+    let tmpl = env.get_template(target)?;
 
     let rendered = tmpl.render(&ctx).map_err(|e| {
-        println!("Could not render template: {:#}", e);
         // render causes as well
         let mut err = &e as &dyn std::error::Error;
         while let Some(next_err) = err.source() {
-            println!("caused by: {:#}", next_err);
             err = next_err;
         }
         error::RenderError::from(e)
@@ -166,6 +177,7 @@ macro_rules! prelude_bindgen {
 
         use std::collections::HashMap;
         use std::sync::Mutex;
+        use std::sync::OnceLock;
 
         ///Maps the #elementId to the event type
         type ListenerMap = HashMap<String, String>;
@@ -179,6 +191,10 @@ macro_rules! prelude_bindgen {
         // cache the last state of $pagecontext as Mutex
         static ref $state: Mutex<Option<$pagecontext>> = Mutex::new(None);
         }
+
+        /// The default templates get loaded once, and then the user can customize them thereafter. These
+        /// default templates are kept in this static variable.
+        pub static DEFAULT_TEMPLATES: OnceLock<Templates> = OnceLock::new();
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
         mod wurbo_tracker {
@@ -198,34 +214,60 @@ macro_rules! prelude_bindgen {
         }
 
         impl $guest for $component {
+            /// Optionally load an array of custom (name, string) templates into the minijinja Environment
+            ///
+            /// If this is called before the first render, ensure you customize **all** the templates
+            /// provided as defaults in the get_templates() function,
+            /// otherwise the default templates will be used.
+            ///
+            /// If called after the first render, any template can be customized individually.
+            fn customize(templates: Vec<(String, String)>) -> Result<(), String> {
+                $crate::jinja::customize(templates, wurbo_tracker::track).map_err(|e| e.to_string())
+            }
+
+            /// Renders the given context into the target template, and returns the rendered HTML
             fn render(context: $context) -> Result<String, String> {
-                // TODO: pass in the templates to the macro.
-                let templates = get_templates();
+                // First, enure that the default templates are loaded
+                let templates = DEFAULT_TEMPLATES.get_or_init(|| {
+                    // get_templates() is provided by the user calling tis macro
+                    let tmpls = get_templates();
+
+                    // Try to get_template of entry.name and output.name,
+                    // if either is not found, then call customize using default templates to load
+                    // them into ENVIRO
+                    let env = $crate::jinja::ENVIRO.lock().unwrap();
+                    if let Err(_) = env
+                        .get_template(&tmpls.entry.name)
+                        .and(env.get_template(&tmpls.output.name))
+                    {
+                        drop(env);
+                        $crate::jinja::customize(tmpls.clone(), wurbo_tracker::track)
+                            .expect("Should be able to load Default templates");
+                    };
+                    tmpls
+                });
+
                 let page_context = $pagecontext::from(&context);
                 // update cache
                 let mut last_state = $state.lock().unwrap();
+                // templates
 
                 let target = if let Some(ref target) = page_context.target {
                     // if target is Some, then use that as the target minijinja template
                     target
                 } else if last_state.is_none() {
                     // if last_state is None, then use the entry minijinja template
-                    templates.entry.name
+                    &templates.entry.name
                 } else {
                     // if last_state is Some, but no override set, then use the output minijinja template
-                    templates.output.name
+                    &templates.output.name
                 };
 
                 *last_state = Some(page_context.clone());
 
                 let ctx = Value::from_struct_object(page_context.clone());
 
-                Ok(wurbo::jinja::render(
-                    &target,
-                    templates,
-                    ctx,
-                    wurbo_tracker::track,
-                )?)
+                Ok(wurbo::jinja::render(&target, ctx)?)
             }
 
             fn activate(selectors: Option<Vec<String>>) {

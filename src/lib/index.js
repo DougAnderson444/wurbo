@@ -3,12 +3,14 @@
 export class Wurbo {
 	// takes the given arrayBuffer and importables string and creates the WebWorker,
 	// using transferable objects to avoid copying the arrayBuffer
-	constructor({ arrayBuffer, importables }, externalEventHandler = (p) => {}) {
+	constructor({ arrayBuffer, importables, templates = [] }, externalEventHandler = (p) => {}) {
 		// create a new WebWorker with the current file path
 		const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
 
 		// post a message to the worker with the action 'load' and the payload { arrayBuffer, importables }
-		worker.postMessage({ action: 'load', payload: { arrayBuffer, importables } }, [arrayBuffer]);
+		worker.postMessage({ action: 'load', payload: { arrayBuffer, importables, templates } }, [
+			arrayBuffer
+		]);
 
 		// helper function to post message to worker, track and process responses
 		this.post = async (action, payload) => {
@@ -126,8 +128,9 @@ export class Wurbo {
 		try {
 			// if data is JS object, it's parsed already, if it's a string, parse it
 			let parsed = typeof data === 'object' ? data : JSON.parse(data);
-			// Not all components will have listeners, so we wrap this in a try/catch to avoid ugly errors
-			// let rendered = mod.wurboOut.render(parsed);
+			// We assume that any array is a byte array of u8, ensure the arrays are uint8arrays
+			// TODO: Will anyone want to pass a different type of array?
+			parsed = toUint8Arrays(parsed);
 			let rendered = await this.post('render', parsed);
 			// in case this event refreshes the DOM, we use the new HTML to update the DOM
 			await this.updateHTML(rendered);
@@ -202,3 +205,16 @@ export const wurboIn = `
         postMessage({ action: 'setHash', payload: hash });
       }
 `;
+
+// Helper function which recursively converts any array to uint8array, because `jco` needs TypedArrays
+function toUint8Arrays(obj) {
+	if (obj instanceof Array) {
+		return new Uint8Array(obj);
+	}
+	if (obj instanceof Object) {
+		for (let key in obj) {
+			obj[key] = toUint8Arrays(obj[key]);
+		}
+	}
+	return obj;
+}
