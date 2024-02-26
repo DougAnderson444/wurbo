@@ -495,7 +495,7 @@ dependencies = [
 
 [[package]]
 name = "wurbo"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "base64ct",
  "convert_case",
