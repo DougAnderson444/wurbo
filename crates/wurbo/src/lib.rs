@@ -1,5 +1,6 @@
 // the render crate needs braces to work
 #![allow(unused_braces)]
+#![feature(lazy_cell)]
 #![doc = include_str!("../README.md")]
 
 pub mod error;
