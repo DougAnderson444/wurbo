@@ -14,7 +14,7 @@ async function init() {
 let initPromise = init();
 
 // set up web worker messaging
-onmessage = async (e) => {
+addEventListener('message', async (e) => {
 	const { action, payload, messageId } = e.data;
 	let rendered;
 
@@ -94,4 +94,4 @@ onmessage = async (e) => {
 			break;
 	}
 	postMessage({ action, payload: rendered, messageId });
-};
+});
