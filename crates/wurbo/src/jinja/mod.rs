@@ -166,7 +166,7 @@ pub fn render(
 /// that stores the last [PageContext] that was rendered.
 #[macro_export]
 macro_rules! prelude_bindgen {
-    ( 
+    (
         $guest: ident,
         $component: ident,
         $pagecontext: ident,
@@ -175,26 +175,22 @@ macro_rules! prelude_bindgen {
 ) => {
         use $crate::prelude::*;
 
-        use std::collections::HashMap;
-        use std::sync::Mutex;
-        use std::sync::OnceLock;
-
         ///Maps the #elementId to the event type
-        type ListenerMap = HashMap<String, String>;
+        type ListenerMap = std::collections::HashMap<String, String>;
 
         // We cannot have &self in the Component struct,
         // so we use static variables to store the state between functions
         // See https://crates.io/crates/lazy_static
         lazy_static! {
         // create Vec<bindings::component::cargo_comp::imports::ListenDetails>
-        static ref LISTENERS_MAP: Mutex<ListenerMap> = Mutex::new(HashMap::new());
+        static ref LISTENERS_MAP: std::sync::Mutex<ListenerMap> = std::sync::Mutex::new(std::collections::HashMap::new());
         // cache the last state of $pagecontext as Mutex
-        static ref $state: Mutex<Option<$pagecontext>> = Mutex::new(None);
+        static ref $state: std::sync::Mutex<Option<$pagecontext>> = std::sync::Mutex::new(None);
         }
 
         /// The default templates get loaded once, and then the user can customize them thereafter. These
         /// default templates are kept in this static variable.
-        pub static DEFAULT_TEMPLATES: OnceLock<Templates> = OnceLock::new();
+        pub static DEFAULT_TEMPLATES: std::sync::OnceLock<Templates> = std::sync::OnceLock::new();
 
         /// unique namespace to clairfy and avoid collisions with other Guest code
         mod wurbo_tracker {
