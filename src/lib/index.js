@@ -1,3 +1,9 @@
+// If this library is used in a data:text/html dataurl, the worker needs to be of the
+// same origin, the way to achieve this is by embeding the worker code directly via blob.
+// Note that the wit library is ~6MB so this is a large blob.
+// We need the bundled worker so that all deps are resolved.
+import workerFile from './bundled/worker.js?raw';
+
 // Make a class called Listener which constructs with a namespace field and has a method called listen
 // The listen method takes a module and returns a namespace
 export class Wurbo {
@@ -5,7 +11,13 @@ export class Wurbo {
 	// using transferable objects to avoid copying the arrayBuffer
 	constructor({ arrayBuffer, importables, templates = [] }, externalEventHandler = (p) => {}) {
 		// create a new WebWorker with the current file path
-		const worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+		// use the raw worker javascript code as the worker source
+		const worker = new Worker(
+			new URL(`data:application/javascript,${encodeURIComponent(workerFile)}`),
+			{
+				type: 'module'
+			}
+		);
 
 		// post a message to the worker with the action 'load' and the payload { arrayBuffer, importables }
 		worker.postMessage({ action: 'load', payload: { arrayBuffer, importables, templates } }, [
