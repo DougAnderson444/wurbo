@@ -20,6 +20,7 @@ use crate::bindings::exports::demo::vowels::wurbo_out::Guest as WurboGuest;
 
 /// The WIT Component struct for implementing the Guest trait
 struct Component;
+bindings::export!(Component with_types_in bindings);
 
 // impl Guest for Component {
 //  // other Guest functions can go here as required.

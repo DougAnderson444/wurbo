@@ -6,7 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wit-bindgen = { version = "0.16.0", default-features = false, features = ["realloc"] }
+bitflags = "2.5.0"
+wit-bindgen-rt = "0.23.0"
 render = "0.3.1"
 wurbo = { workspace = true }
 nanoid = "0.4.0"

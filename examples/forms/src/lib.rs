@@ -20,6 +20,7 @@ use wurbo::prelude_bindgen;
 
 /// The struct for the bound component that implements the Guest traits
 struct Component;
+bindings::export!(Component with_types_in bindings);
 
 const OUTPUT_HTML: &str = "output.html";
 const INDEX_HTML: &str = "index.html";
