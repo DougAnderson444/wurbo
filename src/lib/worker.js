@@ -1,24 +1,13 @@
 import { DEV, BROWSER } from 'esm-env';
+import { load } from 'rollup-plugin-wit-component';
 
-// The load function
-let load;
 // the modules created from wasmBytes and importables
 let mod;
-
-async function init() {
-	if (BROWSER) {
-		({ load } = await import('rollup-plugin-wit-component'));
-	}
-}
-
-let initPromise = init();
 
 // set up web worker messaging
 addEventListener('message', async (e) => {
 	const { action, payload, messageId } = e.data;
 	let rendered;
-
-	await initPromise;
 
 	switch (action) {
 		// takes the payload { arrayBuffer, importables} and loads them using load() from rollup-plugin-wit-component
