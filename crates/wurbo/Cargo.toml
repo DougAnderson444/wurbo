@@ -1,6 +1,6 @@
 [package]
 name = "wurbo"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 license = "MIT"
 description = "A timy framework for WebAssembly Component model front-ends"
@@ -25,5 +25,5 @@ base64ct = { version = "1.6.0", features = ["alloc"] }
 convert_case = "0.6.0"
 pest = "2.6"
 pest_derive = "2.6"
-
+# TODO: audit this dependency
 wit-parser = "0.13.1"
