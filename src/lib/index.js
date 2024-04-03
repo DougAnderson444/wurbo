@@ -57,7 +57,8 @@ export class Wurbo {
 					this.addeventlistener(payload);
 					break;
 				case 'setHash':
-					window.location.hash = payload;
+					// window.location.hash = payload; // not allowed from dataurls
+					history.pushState(0, '0', location.href + '#' + encodeURI(payload));
 					break;
 				case 'emit':
 					// internal event handler updates the DOM
