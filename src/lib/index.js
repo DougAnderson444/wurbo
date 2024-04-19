@@ -1,3 +1,6 @@
+// export WurboLoader, a Svelte component that makes it easy to load a wurbo.wasm file
+export { WurboLoader } from './components/loader/index.js';
+
 // If this library is used in a data:text/html dataurl, the worker needs to be of the
 // same origin, the way to achieve this is by embeding the worker code directly via blob.
 // Note that the wit library is ~6MB so this is a large blob.
