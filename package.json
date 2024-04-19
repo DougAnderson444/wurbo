@@ -12,7 +12,8 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"default": "./dist/index.js"
+			"default": "./dist/index.js",
+			"svelte": "./dist/index.js"
 		},
 		"./worker": {
 			"types": "./dist/worker.d.ts",
