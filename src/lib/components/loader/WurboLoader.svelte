@@ -5,7 +5,7 @@
 	import { $init as init, provider } from './graph/graph.js';
 	import Progress from './Progress.svelte';
 
-	export let pluginFile;
+	let pluginFile;
 
 	const files = new Map();
 	let fileinput;
@@ -95,6 +95,7 @@
 			// Relay emitted commands from the Wasm component to PiperNet
 			console.log('Command emitted: ', { payload });
 			try {
+				dispatch('command', payload);
 				// return await piper.command(payload);
 			} catch (error) {
 				// it's ok to fail silently, not all messages are commands
@@ -129,32 +130,37 @@
 	<input
 		style="display:none"
 		type="file"
-		accept=".wasm, .wasm"
+		accept=".wasm"
 		on:change={(e) => onFileSelected(e)}
 		bind:this={fileinput}
 	/>
-	<div
-		class="flex w-fit m-2 justify-center cursor-pointer border border-green-400 rounded-md px-4 py-2 shadow"
-		on:keypress={() => {
-			fileinput.click();
-		}}
-		on:click={() => {
-			fileinput.click();
-		}}
-	>
-		<div class="flex">
-			Load wurbo *.wasm file (must export <span class="font-mono mx-1 px-1 bg-amber-100 rounded-lg"
-				>wurbo-in</span
-			>
-			and import
-			<span class="font-mono mx-1 px-1 bg-amber-100 rounded-lg">wurbo-out</span>
-			)
+	<div class="flex flex-col p-4">
+		<div
+			class="flex w-fit justify-center cursor-pointer border border-green-400 rounded-md px-4 py-2 shadow"
+			on:keypress={() => {
+				fileinput.click();
+			}}
+			on:click={() => {
+				fileinput.click();
+			}}
+		>
+			<div class="flex">Browse *.wasm file...</div>
 		</div>
 	</div>
 {/if}
 
 <style lang="postcss">
-	@tailwind base;
-	@tailwind components;
 	@tailwind utilities;
+
+	h2 {
+		@apply text-lg font-bold pt-2 pb-1;
+	}
+
+	p {
+		@apply text-base;
+	}
+
+	code {
+		@apply text-sm font-mono bg-neutral-700 text-neutral-100 p-1 px-2 rounded-md;
+	}
 </style>
