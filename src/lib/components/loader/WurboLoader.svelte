@@ -151,16 +151,4 @@
 
 <style lang="postcss">
 	@tailwind utilities;
-
-	h2 {
-		@apply text-lg font-bold pt-2 pb-1;
-	}
-
-	p {
-		@apply text-base;
-	}
-
-	code {
-		@apply text-sm font-mono bg-neutral-700 text-neutral-100 p-1 px-2 rounded-md;
-	}
 </style>
