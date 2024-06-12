@@ -144,7 +144,7 @@
 				fileinput.click();
 			}}
 		>
-			<div class="flex">Browse *.wasm file...</div>
+			<div class="flex p-2 rounded-md shadow">Browse *.wasm file...</div>
 		</div>
 	</div>
 {/if}
