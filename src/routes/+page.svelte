@@ -1,7 +1,20 @@
 <script>
 	import { onMount } from 'svelte';
-	import * as wurbo from 'wurbo';
-	import examples from '$examples/index.js';
+	import { browser } from '$app/environment';
+
+	let examples;
+
+	async function browserLoad() {
+		if (!import.meta.env.SSR && browser) {
+			// This code will only run in the browser
+			let ex = await import('$examples/index.js');
+			examples = ex.default;
+		} else {
+			// This code will only run in the server
+			console.log('server', browser);
+		}
+	}
+	browserLoad();
 </script>
 
 <div>
