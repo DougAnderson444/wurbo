@@ -1,6 +1,6 @@
 [package]
 name = "wurbo"
-version = "0.3.3"
+version = "0.4.0"
 edition = "2021"
 license = "MIT"
 description = "A timy framework for WebAssembly Component model front-ends"
@@ -17,7 +17,7 @@ authors = ["Doug Anderson <DougAnderson444@peerpiper.io>"]
 lazy_static = "1.4.0"
 nanoid = "0.4.0"
 thiserror = "1.0"
-minijinja = { version = "1.0.11", features = ["json", "loader"] }
+minijinja = { version = "2.0.2", features = ["json", "loader"] }
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = { version = "1.0.112" }
 base64ct = { version = "1.6.0", features = ["alloc"] }
@@ -25,5 +25,3 @@ base64ct = { version = "1.6.0", features = ["alloc"] }
 convert_case = "0.6.0"
 pest = "2.6"
 pest_derive = "2.6"
-# TODO: audit this dependency
-wit-parser = "0.13.1"

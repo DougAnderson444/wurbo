@@ -159,7 +159,7 @@ pub fn render(
 
 /// Implements the wurbo_out::Guest trait for the given component.
 ///
-/// You must have a `PageContext` struct that implements StructObject in the same file where you use
+/// You must have a [`PageContext`] struct that implements [`minijinja::value::Object`] in the same file where you use
 /// this macro.
 ///
 /// This macro also creates and makes available a `LAST_STATE` static variable
@@ -261,7 +261,7 @@ macro_rules! prelude_bindgen {
 
                 *last_state = Some(page_context.clone());
 
-                let ctx = Value::from_struct_object(page_context.clone());
+                let ctx = Value::from_object(page_context.clone());
 
                 Ok(wurbo::jinja::render(&target, ctx)?)
             }

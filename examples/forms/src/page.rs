@@ -4,17 +4,13 @@ use super::*;
 #[derive(Debug, Clone)]
 pub(crate) struct Page(types::Page);
 
-impl StructObject for Page {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Page {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "title" => Some(Value::from(self.title.clone())),
             "id" => Some(Value::from(rand_id())),
             _ => None,
         }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
     }
 }
 

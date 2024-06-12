@@ -1,20 +1,18 @@
 use super::*;
 
+use std::sync::Arc;
+
 /// Input is the input form(s)
 #[derive(Debug, Clone)]
 pub(crate) struct Input(types::Input);
 
-impl StructObject for Input {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Input {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "id" => Some(Value::from(rand_id())),
             "placeholder" => Some(Value::from(self.placeholder.clone())),
             _ => None,
         }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["placeholder", "username_input", "password_input"])
     }
 }
 

@@ -51,18 +51,14 @@ pub struct PageContext {
     target: Option<String>,
 }
 
-impl StructObject for PageContext {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "page" => Some(Value::from_struct_object(self.page.clone())),
-            "input" => Some(Value::from_struct_object(self.input.clone())),
-            "output" => Some(Value::from_struct_object(self.output.clone())),
+impl Object for PageContext {
+    fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
+            "page" => Some(Value::from_object(self.page.clone())),
+            "input" => Some(Value::from_object(self.input.clone())),
+            "output" => Some(Value::from_object(self.output.clone())),
             _ => None,
         }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["page", "input", "output"])
     }
 }
 
@@ -101,17 +97,13 @@ impl From<Phrase> for PageContext {
 #[derive(Debug, Clone)]
 struct Page(types::Page);
 
-impl StructObject for Page {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Page {
+    fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "title" => Some(Value::from(self.title.clone())),
             "id" => Some(Value::from(utils::rand_id())),
             _ => None,
         }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["title", "id"])
     }
 }
 
@@ -133,17 +125,13 @@ impl Deref for Page {
 #[derive(Debug, Clone)]
 struct Input(types::Input);
 
-impl StructObject for Input {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Input {
+    fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "placeholder" => Some(Value::from(self.placeholder.clone())),
             "id" => Some(Value::from(utils::rand_id())),
             _ => None,
         }
-    }
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["placeholder", "id"])
     }
 }
 
@@ -176,20 +164,15 @@ impl Output {
 
 /// This is where the magic happens. Calling `render` executes `get_field` which will take the
 /// value as input and generate a new `count` which is then displayed in the `template`.
-impl StructObject for Output {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Output {
+    fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "value" => Some(Value::from(self.value.clone())),
             "count" => Some(Value::from(self.calculate())),
             // if self.id.is_some, use it, otherwise generate a new one
             "id" => Some(Value::from(self.id.clone().unwrap_or(utils::rand_id()))),
             _ => None,
         }
-    }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["name", "count", "id"])
     }
 }
 
@@ -223,17 +206,12 @@ impl From<Phrase> for Output {
 #[derive(Debug, Default, Clone)]
 struct Phrase(Option<String>);
 
-impl StructObject for Phrase {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "phrase" => Some(Value::from(self.deref().clone())),
+impl Object for Phrase {
+    fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
+            "phrase" => Some(Value::from(self.as_ref().deref().clone())),
             _ => None,
         }
-    }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["phrase"])
     }
 }
 

@@ -30,13 +30,13 @@ impl Output {
     }
 }
 
-/// Impleent StructObject for Output so we can use minijina to automagically calculate the length
+/// Impleent Object for Output so we can use minijina to automagically calculate the length
 /// of the username and password concatenated
-impl StructObject for Output {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
-            "username" => Some(Value::from_struct_object(self.username.clone())),
-            "password" => Some(Value::from_struct_object(self.password.clone())),
+impl Object for Output {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
+            "username" => Some(Value::from_object(self.username.clone())),
+            "password" => Some(Value::from_object(self.password.clone())),
             "value" => Some(Value::from(self.concat())),
             // self.username.value
             "count" => Some(Value::from(self.calculate())),
@@ -45,31 +45,24 @@ impl StructObject for Output {
             _ => None,
         }
     }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value", "count", "id", "username", "password"])
-    }
 }
 
 /// Username captures is the username input value.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Username(Option<String>);
 
-impl StructObject for Username {
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+impl Object for Username {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "value" => Some(Value::from(
                 // Deref self and use value if is_Some, otherwise use ""
-                self.as_ref().map(|v| v.clone()).unwrap_or_default(),
+                self.as_ref()
+                    .as_ref()
+                    .map(|v| v.clone())
+                    .unwrap_or_default(),
             )),
             _ => None,
         }
-    }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value"])
     }
 }
 
@@ -94,26 +87,24 @@ impl Deref for Username {
 }
 
 /// [Password] is the password field in the form
-/// We wrap it as a newtype so that we can impl [StructObject] for it
+/// We wrap it as a newtype so that we can impl [Object] for it
 /// We impl [Deref] so we can access the inner of the Rust smart pointer
 #[derive(Debug, Default, Clone)]
 pub(crate) struct Password(Option<String>);
 
-impl StructObject for Password {
+impl Object for Password {
     // If you add fields to the , you'd add them also here below:
-    fn get_field(&self, name: &str) -> Option<Value> {
-        match name {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
             "value" => Some(Value::from(
                 // Deref self and use value if is_Some, otherwise use ""
-                self.as_ref().map(|v| v.clone()).unwrap_or_default(),
+                self.as_ref()
+                    .as_ref()
+                    .map(|v| v.clone())
+                    .unwrap_or_default(),
             )),
             _ => None,
         }
-    }
-
-    /// So that debug will show the values
-    fn static_fields(&self) -> Option<&'static [&'static str]> {
-        Some(&["value"])
     }
 }
 
