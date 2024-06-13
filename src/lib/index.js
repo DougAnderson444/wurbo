@@ -12,15 +12,21 @@ import workerFile from './bundled/worker.js?raw';
 export class Wurbo {
 	// takes the given arrayBuffer and importables string and creates the WebWorker,
 	// using transferable objects to avoid copying the arrayBuffer
-	constructor({ arrayBuffer, importables, templates = [] }, externalEventHandler = (p) => {}) {
-		// create a new WebWorker with the current file path
-		// use the raw worker javascript code as the worker source
-		const worker = new Worker(
-			new URL(`data:application/javascript,${encodeURIComponent(workerFile)}`),
-			{
-				type: 'module'
-			}
-		);
+	constructor(
+		{ arrayBuffer, importables, templates = [], inline = false },
+		externalEventHandler = (p) => {}
+	) {
+		let worker;
+		if (inline) {
+			worker = new Worker(
+				new URL(`data:application/javascript,${encodeURIComponent(workerFile)}`),
+				{ type: 'module' }
+			);
+			console.log(`Inline Dataurl worker`, { worker });
+		} else {
+			worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
+			console.log(`Direct worker`, { worker });
+		}
 
 		// post a message to the worker with the action 'load' and the payload { arrayBuffer, importables }
 		worker.postMessage({ action: 'load', payload: { arrayBuffer, importables, templates } }, [
