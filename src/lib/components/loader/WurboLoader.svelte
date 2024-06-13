@@ -5,6 +5,12 @@
 	import { $init as init, provider } from './graph/graph.js';
 	import Progress from './Progress.svelte';
 
+	/**
+	 * Whether the worker should be loaded inline as base64 or not.
+	 * Default is false.
+	 */
+	export let inline = false;
+
 	let pluginFile;
 
 	const files = new Map();
@@ -91,7 +97,7 @@
 			});
 
 		// load the import handles into the Wasm component and get the ES module returned
-		wurbo = new Wurbo({ arrayBuffer, importables }, async (payload) => {
+		wurbo = new Wurbo({ arrayBuffer, importables, inline }, async (payload) => {
 			// Relay emitted commands from the Wasm component to PiperNet
 			console.log('Command emitted: ', { payload });
 			try {
