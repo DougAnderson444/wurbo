@@ -1,4 +1,3 @@
-import { DEV, BROWSER } from 'esm-env';
 import { load } from 'rollup-plugin-wit-component';
 
 // the modules created from wasmBytes and importables
