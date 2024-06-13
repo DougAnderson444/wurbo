@@ -91,6 +91,12 @@ You can preview the production build with `npm run preview`.
 To publish to npm:
 
 ```bash
+just publish
+```
+
+or, manually:
+
+```bash
 npm run package
 npm publish
 ```
