@@ -35,7 +35,7 @@
 		"format": "prettier --plugin-search-dir . --write ."
 	},
 	"dependencies": {
-		"rollup-plugin-wit-component": "0.2.4"
+		"rollup-plugin-wit-component": "0.2.5"
 	},
 	"devDependencies": {
 		"@rollup/plugin-terser": "^0.4.4",
