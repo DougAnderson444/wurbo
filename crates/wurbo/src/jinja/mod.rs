@@ -31,7 +31,7 @@ pub static ENVIRO: LazyLock<Mutex<Environment>> = LazyLock::new(|| Mutex::new(En
 
 /// This struct and it's impls replaces the templates Vec with a type that identifies an Entry
 /// tuple,
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Templates {
     pub entry: Entry,
     pub output: Entry,
@@ -84,7 +84,7 @@ impl Deref for Rest {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Entry {
     pub name: String,
     pub template: String,
