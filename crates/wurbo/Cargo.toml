@@ -1,6 +1,6 @@
 [package]
 name = "wurbo"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 license = "MIT"
 description = "A timy framework for WebAssembly Component model front-ends"
