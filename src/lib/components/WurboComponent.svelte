@@ -55,7 +55,6 @@
 		let imports;
 		try {
 			let component = Graph.addComponent('loaded', bytes);
-			console.log('component', component);
 			imports = component.imports;
 		} catch (error) {
 			console.error('error getting importables', { error });
@@ -67,8 +66,6 @@
 				let name = i.name.split('@')[0];
 				return { [name]: wurboIn };
 			});
-
-		console.log('importables', importables);
 
 		// load the import handles into the Wasm component and get the ES module returned
 		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables, templates }, eventHandler);
