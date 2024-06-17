@@ -19,10 +19,8 @@ export class Wurbo {
 				new URL(`data:application/javascript,${encodeURIComponent(workerFile)}`),
 				{ type: 'module' }
 			);
-			console.log(`Inline Dataurl worker`, { worker });
 		} else {
 			worker = new Worker(new URL('./worker.js', import.meta.url), { type: 'module' });
-			console.log(`Direct worker`, { worker });
 		}
 
 		// post a message to the worker with the action 'load' and the payload { arrayBuffer, importables }
@@ -168,6 +166,7 @@ export class Wurbo {
 	}
 
 	async addeventlistener({ selector, ty }) {
+		console.log('Adding event listener', selector, ty);
 		document.querySelector(selector).addEventListener(ty, async (e) => {
 			let val = e.target.value;
 
