@@ -29,11 +29,17 @@ bindings::export!(Component with_types_in bindings);
 /// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
-        Index::new("page.html", include_str!("templates/page.html")),
-        Entry::new("output.html", include_str!("templates/output.html")),
+        Index::new(
+            "page.html".to_owned(),
+            include_str!("templates/page.html").to_owned(),
+        ),
+        Entry::new(
+            "output.html".to_owned(),
+            include_str!("templates/output.html").to_owned(),
+        ),
         Rest::new(vec![Entry::new(
-            "input.html",
-            include_str!("templates/input.html"),
+            "input.html".to_owned(),
+            include_str!("templates/input.html").to_owned(),
         )]),
     );
     templates

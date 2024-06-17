@@ -51,7 +51,7 @@ impl Templates {
 pub struct Index(Entry);
 
 impl Index {
-    pub fn new(name: &'static str, template: &'static str) -> Self {
+    pub fn new(name: String, template: String) -> Self {
         Self(Entry::new(name, template))
     }
 }
@@ -91,11 +91,8 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub fn new(name: &'static str, template: &'static str) -> Self {
-        Self {
-            name: name.to_string(),
-            template: template.to_string(),
-        }
+    pub fn new(name: String, template: String) -> Self {
+        Self { name, template }
     }
 }
 

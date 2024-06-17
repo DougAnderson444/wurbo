@@ -29,11 +29,17 @@ const INPUT_HTML: &str = "input.html";
 /// We need to provide the templates for the macro to pull in
 fn get_templates() -> Templates {
     let templates = Templates::new(
-        Index::new(INDEX_HTML, include_str!("templates/index.html")),
-        Entry::new(OUTPUT_HTML, include_str!("templates/output.html")),
+        Index::new(
+            INDEX_HTML.to_owned(),
+            include_str!("templates/index.html").to_owned(),
+        ),
+        Entry::new(
+            OUTPUT_HTML.to_owned(),
+            include_str!("templates/output.html").to_owned(),
+        ),
         Rest::new(vec![Entry::new(
-            INPUT_HTML,
-            include_str!("templates/input.html"),
+            INPUT_HTML.to_owned(),
+            include_str!("templates/input.html").to_owned(),
         )]),
     );
     templates
