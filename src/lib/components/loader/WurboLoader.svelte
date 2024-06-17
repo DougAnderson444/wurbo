@@ -63,7 +63,6 @@
 
 		reader.addEventListener('load', (evt) => {
 			const file = files.get(evt.target);
-			console.log(`The contents of ${file.name}:`);
 			name = file.name;
 		});
 
@@ -81,7 +80,6 @@
 		let imports;
 		try {
 			let component = Graph.addComponent('loaded', bytes);
-			console.log('component', component);
 			imports = component.imports;
 		} catch (error) {
 			console.error('error getting importables', { error });
