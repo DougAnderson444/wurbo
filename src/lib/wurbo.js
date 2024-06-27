@@ -62,7 +62,16 @@ export class Wurbo {
 					break;
 				case 'setHash':
 					// window.location.hash = payload; // not allowed from dataurls
-					history.pushState(0, '0', location.href + '#' + encodeURI(payload));
+					// 1. Get current searchParams from hash
+					let searchParams = new URLSearchParams(location.hash.slice(1));
+					// 2. Add payload to searchParams using Object assign, overwriting any existing values that are duplicates
+					searchParams = new URLSearchParams(
+						Object.assign(Object.fromEntries(searchParams), JSON.parse(payload))
+					);
+					console.log('Setting hash', searchParams, { payload: JSON.parse(payload) });
+					// 3. Push the new hash to the history stack
+					history.pushState(0, '0', location.href.split('#')[0] + '#' + searchParams.toString());
+
 					break;
 				case 'emit':
 					// internal event handler updates the DOM
