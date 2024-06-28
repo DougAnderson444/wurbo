@@ -68,7 +68,6 @@ export class Wurbo {
 					searchParams = new URLSearchParams(
 						Object.assign(Object.fromEntries(searchParams), JSON.parse(payload))
 					);
-					console.log('Setting hash', searchParams, { payload: JSON.parse(payload) });
 					// 3. Push the new hash to the history stack
 					history.pushState(0, '0', location.href.split('#')[0] + '#' + searchParams.toString());
 
@@ -175,7 +174,6 @@ export class Wurbo {
 	}
 
 	async addeventlistener({ selector, ty }) {
-		console.log('Adding event listener', selector, ty);
 		document.querySelector(selector).addEventListener(ty, async (e) => {
 			let val = e.target.value;
 
