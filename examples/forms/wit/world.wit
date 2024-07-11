@@ -35,11 +35,20 @@ interface types {
     output: option<output>,
   }
 
+  /// Content for a file, bytes and name
+  record file-details {
+    /// The bytes of the file
+    bytes: list<u8>,
+    /// The name of the file
+    filename: string
+  }
+
   // Context variants
   variant context {
     all-content(content),
     username(string),
     password(string),
+    file(file-details)
   }
 
 }

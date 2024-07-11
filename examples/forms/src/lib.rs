@@ -77,6 +77,7 @@ impl From<&types::Context> for PageContext {
             types::Context::AllContent(c) => PageContext::from(c.clone()),
             types::Context::Username(u) => PageContext::from(output::Username::from(u.to_owned())),
             types::Context::Password(p) => PageContext::from(output::Password::from(p.to_owned())),
+            types::Context::File(f) => PageContext::from(output::File::from(f.to_owned())),
         }
     }
 }
@@ -110,6 +111,15 @@ impl From<output::Password> for PageContext {
         // Safe to unwrap here because render on all page content will always be called first
         let mut state = { LAST_STATE.lock().unwrap().clone().unwrap() };
         state.output.password = password;
+        state
+    }
+}
+
+impl From<output::File> for PageContext {
+    fn from(file: output::File) -> Self {
+        // Safe to unwrap here because render on all page content will always be called first
+        let mut state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+        state.output.file = Some(file);
         state
     }
 }

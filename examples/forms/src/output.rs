@@ -6,6 +6,8 @@ pub(super) struct Output {
     id: Option<String>,
     pub(crate) username: Username,
     pub(crate) password: Password,
+    /// File
+    pub(crate) file: Option<File>,
 }
 
 impl Output {
@@ -37,6 +39,8 @@ impl Object for Output {
         match key.as_str()? {
             "username" => Some(Value::from_object(self.username.clone())),
             "password" => Some(Value::from_object(self.password.clone())),
+            // if self.file.is_some, use it, otherwise use ""
+            "file" => self.file.as_ref().map(|v| Value::from_object(v.clone())),
             "value" => Some(Value::from(self.concat())),
             // self.username.value
             "count" => Some(Value::from(self.calculate())),
@@ -125,5 +129,32 @@ impl Deref for Password {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+/// [File] is the filename and bytes from the form
+#[derive(Debug, Default, Clone)]
+pub(crate) struct File {
+    pub(crate) filename: String,
+    pub(crate) bytes: Vec<u8>,
+}
+
+impl Object for File {
+    fn get_value(self: &Arc<Self>, key: &Value) -> Option<Value> {
+        match key.as_str()? {
+            "name" => Some(Value::from(self.filename.clone())),
+            "bytes" => Some(Value::from(self.bytes.clone())),
+            _ => None,
+        }
+    }
+}
+
+/// Convert from [types::FileDetails] to [File]
+impl From<types::FileDetails> for File {
+    fn from(context: types::FileDetails) -> Self {
+        File {
+            filename: context.filename,
+            bytes: context.bytes,
+        }
     }
 }

@@ -8,4 +8,9 @@
 		The length is: {% if output.count == 0 %} has no length. {% elif output.count == 1 %} has 1
 		char. {% else %} has <b>{{output.count}} characters</b>. {% endif %} <br />
 	</div>
+	<!-- Show output.filename and .bytes; only if output.file is defined -->
+	{% if output.file is defined %}
+	<div>Filename: <b>{{output.file.name}}</b></div>
+	<div>File size: <b>{{output.file.bytes|length}}</b></div>
+	{% endif %}
 </div>
