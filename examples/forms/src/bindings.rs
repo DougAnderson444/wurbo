@@ -5,7 +5,7 @@ pub mod demo {
     #[allow(dead_code)]
     pub mod forms {
         #[allow(dead_code, clippy::all)]
-        pub mod types {
+        pub mod wurbo_in {
             #[used]
             #[doc(hidden)]
             #[cfg(target_arch = "wasm32")]
@@ -26,6 +26,62 @@ pub mod demo {
                         .finish()
                 }
             }
+            /// Content for a file, bytes and name
+            #[derive(Clone)]
+            pub struct FileDetails {
+                /// The bytes of the file
+                pub bytes: _rt::Vec<u8>,
+                /// The name of the file
+                pub filename: _rt::String,
+            }
+            impl ::core::fmt::Debug for FileDetails {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    f.debug_struct("FileDetails")
+                        .field("bytes", &self.bytes)
+                        .field("filename", &self.filename)
+                        .finish()
+                }
+            }
+            #[allow(unused_unsafe, clippy::all)]
+            /// Add an event listener to the given element
+            pub fn addeventlistener(details: &ListenDetails) {
+                unsafe {
+                    let ListenDetails {
+                        selector: selector0,
+                        ty: ty0,
+                    } = details;
+                    let vec1 = selector0;
+                    let ptr1 = vec1.as_ptr().cast::<u8>();
+                    let len1 = vec1.len();
+                    let vec2 = ty0;
+                    let ptr2 = vec2.as_ptr().cast::<u8>();
+                    let len2 = vec2.len();
+
+                    #[cfg(target_arch = "wasm32")]
+                    #[link(wasm_import_module = "demo:forms/wurbo-in")]
+                    extern "C" {
+                        #[link_name = "addeventlistener"]
+                        fn wit_import(_: *mut u8, _: usize, _: *mut u8, _: usize);
+                    }
+
+                    #[cfg(not(target_arch = "wasm32"))]
+                    fn wit_import(_: *mut u8, _: usize, _: *mut u8, _: usize) {
+                        unreachable!()
+                    }
+                    wit_import(ptr1.cast_mut(), len1, ptr2.cast_mut(), len2);
+                }
+            }
+        }
+
+        #[allow(dead_code, clippy::all)]
+        pub mod types {
+            #[used]
+            #[doc(hidden)]
+            #[cfg(target_arch = "wasm32")]
+            static __FORCE_SECTION_REF: fn() =
+                super::super::super::__link_custom_section_describing_imports;
+            use super::super::super::_rt;
+            pub type FileDetails = super::super::super::demo::forms::wurbo_in::FileDetails;
             /// Context for the minijinja rendering
             #[derive(Clone)]
             pub struct Page {
@@ -84,22 +140,6 @@ pub mod demo {
                         .finish()
                 }
             }
-            /// Content for a file, bytes and name
-            #[derive(Clone)]
-            pub struct FileDetails {
-                /// The bytes of the file
-                pub bytes: _rt::Vec<u8>,
-                /// The name of the file
-                pub filename: _rt::String,
-            }
-            impl ::core::fmt::Debug for FileDetails {
-                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    f.debug_struct("FileDetails")
-                        .field("bytes", &self.bytes)
-                        .field("filename", &self.filename)
-                        .finish()
-                }
-            }
             /// Context variants
             #[derive(Clone)]
             pub enum Context {
@@ -122,45 +162,6 @@ pub mod demo {
                         }
                         Context::File(e) => f.debug_tuple("Context::File").field(e).finish(),
                     }
-                }
-            }
-        }
-
-        #[allow(dead_code, clippy::all)]
-        pub mod wurbo_in {
-            #[used]
-            #[doc(hidden)]
-            #[cfg(target_arch = "wasm32")]
-            static __FORCE_SECTION_REF: fn() =
-                super::super::super::__link_custom_section_describing_imports;
-            pub type ListenDetails = super::super::super::demo::forms::types::ListenDetails;
-            #[allow(unused_unsafe, clippy::all)]
-            /// Add an event listener to the given element
-            pub fn addeventlistener(details: &ListenDetails) {
-                unsafe {
-                    let super::super::super::demo::forms::types::ListenDetails {
-                        selector: selector0,
-                        ty: ty0,
-                    } = details;
-                    let vec1 = selector0;
-                    let ptr1 = vec1.as_ptr().cast::<u8>();
-                    let len1 = vec1.len();
-                    let vec2 = ty0;
-                    let ptr2 = vec2.as_ptr().cast::<u8>();
-                    let len2 = vec2.len();
-
-                    #[cfg(target_arch = "wasm32")]
-                    #[link(wasm_import_module = "demo:forms/wurbo-in")]
-                    extern "C" {
-                        #[link_name = "addeventlistener"]
-                        fn wit_import(_: *mut u8, _: usize, _: *mut u8, _: usize);
-                    }
-
-                    #[cfg(not(target_arch = "wasm32"))]
-                    fn wit_import(_: *mut u8, _: usize, _: *mut u8, _: usize) {
-                        unreachable!()
-                    }
-                    wit_import(ptr1.cast_mut(), len1, ptr2.cast_mut(), len2);
                 }
             }
         }
@@ -380,7 +381,7 @@ pub mod exports {
                                 let len35 = l34;
                                 let bytes35 = _rt::Vec::from_raw_parts(l33.cast(), len35, len35);
 
-                                super::super::super::super::demo::forms::types::FileDetails {
+                                super::super::super::super::demo::forms::wurbo_in::FileDetails {
                                     bytes: _rt::Vec::from_raw_parts(l30.cast(), len32, len32),
                                     filename: _rt::string_lift(bytes35),
                                 }
@@ -579,22 +580,23 @@ pub(crate) use __export_main_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.25.0:main:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 719] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xd4\x04\x01A\x02\x01\
-A\x08\x01B\x11\x01r\x02\x08selectors\x02tys\x04\0\x0elisten-details\x03\0\0\x01r\
-\x01\x05titles\x04\0\x04page\x03\0\x02\x01r\x01\x0bplaceholders\x04\0\x05input\x03\
-\0\x04\x01ks\x01r\x04\x05value\x06\x02id\x06\x08username\x06\x08password\x06\x04\
-\0\x06output\x03\0\x07\x01k\x08\x01r\x03\x04page\x03\x05input\x05\x06output\x09\x04\
-\0\x07content\x03\0\x0a\x01p}\x01r\x02\x05bytes\x0c\x08filenames\x04\0\x0cfile-d\
-etails\x03\0\x0d\x01q\x04\x0ball-content\x01\x0b\0\x08username\x01s\0\x08passwor\
-d\x01s\0\x04file\x01\x0e\0\x04\0\x07context\x03\0\x0f\x03\x01\x10demo:forms/type\
-s\x05\0\x02\x03\0\0\x0elisten-details\x01B\x04\x02\x03\x02\x01\x01\x04\0\x0elist\
-en-details\x03\0\0\x01@\x01\x07details\x01\x01\0\x04\0\x10addeventlistener\x01\x02\
-\x03\x01\x13demo:forms/wurbo-in\x05\x02\x02\x03\0\0\x07context\x01B\x0e\x02\x03\x02\
-\x01\x03\x04\0\x07context\x03\0\0\x01o\x02ss\x01p\x02\x01j\0\x01s\x01@\x01\x09te\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 759] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xfc\x04\x01A\x02\x01\
+A\x09\x01B\x07\x01r\x02\x08selectors\x02tys\x04\0\x0elisten-details\x03\0\0\x01p\
+}\x01r\x02\x05bytes\x02\x08filenames\x04\0\x0cfile-details\x03\0\x03\x01@\x01\x07\
+details\x01\x01\0\x04\0\x10addeventlistener\x01\x05\x03\x01\x13demo:forms/wurbo-\
+in\x05\0\x02\x03\0\0\x0elisten-details\x02\x03\0\0\x0cfile-details\x01B\x10\x02\x03\
+\x02\x01\x01\x04\0\x0elisten-details\x03\0\0\x02\x03\x02\x01\x02\x04\0\x0cfile-d\
+etails\x03\0\x02\x01r\x01\x05titles\x04\0\x04page\x03\0\x04\x01r\x01\x0bplacehol\
+ders\x04\0\x05input\x03\0\x06\x01ks\x01r\x04\x05value\x08\x02id\x08\x08username\x08\
+\x08password\x08\x04\0\x06output\x03\0\x09\x01k\x0a\x01r\x03\x04page\x05\x05inpu\
+t\x07\x06output\x0b\x04\0\x07content\x03\0\x0c\x01q\x04\x0ball-content\x01\x0d\0\
+\x08username\x01s\0\x08password\x01s\0\x04file\x01\x03\0\x04\0\x07context\x03\0\x0e\
+\x03\x01\x10demo:forms/types\x05\x03\x02\x03\0\x01\x07context\x01B\x0e\x02\x03\x02\
+\x01\x04\x04\0\x07context\x03\0\0\x01o\x02ss\x01p\x02\x01j\0\x01s\x01@\x01\x09te\
 mplates\x03\0\x04\x04\0\x09customize\x01\x05\x01j\x01s\x01s\x01@\x01\x03ctx\x01\0\
 \x06\x04\0\x06render\x01\x07\x01ps\x01k\x08\x01@\x01\x09selectors\x09\x01\0\x04\0\
-\x08activate\x01\x0a\x04\x01\x14demo:forms/wurbo-out\x05\x04\x04\x01\x0fdemo:for\
+\x08activate\x01\x0a\x04\x01\x14demo:forms/wurbo-out\x05\x05\x04\x01\x0fdemo:for\
 ms/main\x04\0\x0b\x0a\x01\0\x04main\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\
 \x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
 

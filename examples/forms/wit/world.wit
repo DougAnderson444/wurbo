@@ -2,11 +2,7 @@ package demo:forms;
 
 interface types {
 
-  // Details required in order to add an event listener to an element
-  record listen-details {
-    selector: string,
-    ty: string,
-  }
+  use wurbo-in.{listen-details, file-details};
 
   // Context for the minijinja rendering
   record page {
@@ -35,14 +31,6 @@ interface types {
     output: option<output>,
   }
 
-  /// Content for a file, bytes and name
-  record file-details {
-    /// The bytes of the file
-    bytes: list<u8>,
-    /// The name of the file
-    filename: string
-  }
-
   // Context variants
   variant context {
     all-content(content),
@@ -55,7 +43,20 @@ interface types {
 
 interface wurbo-in {
 
-  use types.{listen-details};
+  // Details required in order to add an event listener to an element
+  record listen-details {
+    selector: string,
+    ty: string,
+  }
+
+  /// Content for a file, bytes and name
+  record file-details {
+    /// The bytes of the file
+    bytes: list<u8>,
+    /// The name of the file
+    filename: string
+  }
+
 
   // Add an event listener to the given element
   addeventlistener: func(details: listen-details);
