@@ -10,29 +10,39 @@
 	 * @type {Array<[string, string]>}
 	 */
 	export let templates = null;
+
 	/**
 	 * The data that is passed to the component
-	 * @type {Object}
+	 * @type {Object} - Default: null
 	 */
 	export let data = {};
 	/**
 	 * The wasm URL where the WIT Component can be resolved
+	 * @type {string} - Default: ''
 	 */
 	export let wasmURL;
 
 	/**
 	 * The callback function that is passed to the component
-	 * @type {Function}
+	 * @type {Function} - Default: null
 	 */
 	export let eventHandler = (payload) => {
 		dispatch('event', payload);
 	};
 
 	/**
+	 * Whether the component should be rendered inline or not. This is only needed
+	 * if Wurbo is going to be bundled into a dataurl like in `integrity-wallet`.
+	 * @type {boolean} - whether wurbo worker is inlined - Default: false
+	 */
+	export let inline = false;
+
+	/**
 	 * The rendered component as a string of HTML
-	 * @type {string | null}
+	 * @type {string | null} - Default: null
 	 */
 	let renderedHTML;
+
 	/**
 	 * The module that loads the WebAssembly component
 	 *
@@ -68,7 +78,7 @@
 			});
 
 		// load the import handles into the Wasm component and get the ES module returned
-		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables, templates }, eventHandler);
+		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables, templates, inline }, eventHandler);
 
 		renderedHTML = await wurbo.render({
 			// technically `all-content` could be named anything, but convention for now is to use `all-content`
