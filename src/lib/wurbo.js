@@ -175,14 +175,32 @@ export class Wurbo {
 
 	async addeventlistener({ selector, ty }) {
 		document.querySelector(selector).addEventListener(ty, async (e) => {
+			let tag = e.target.dataset.contextName || e.target.name;
+
+			// Handle file upload via input[type=file]. Check if e.target.files contains a file
+			if (e.target.files && e.target.files.length > 0) {
+				let file = e.target.files[0];
+				let reader = new FileReader();
+				reader.onload = async (loadEvt) => {
+					let bytes = new Uint8Array(loadEvt.target.result);
+					console.log('file bytes', bytes);
+					let ctx = {
+						tag,
+						val: { bytes, filename: file.name }
+					};
+					let rendered = await this.post('render', ctx);
+					this.dom(rendered);
+				};
+				reader.readAsArrayBuffer(file);
+				return;
+			}
+
 			let val = e.target.value;
 
 			// detect if form event
 			if (e.target.closest('form')) {
 				e.preventDefault();
 			}
-
-			let tag = e.target.dataset.contextName || e.target.name;
 
 			try {
 				val = Object.assign(
