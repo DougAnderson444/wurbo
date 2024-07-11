@@ -182,7 +182,7 @@ export class Wurbo {
 				let file = e.target.files[0];
 				let reader = new FileReader();
 				reader.onload = async (loadEvt) => {
-					let bytes = new Uint8Array(loadEvt.target.result);
+					let bytes = loadEvt.target.result;
 					console.log('file bytes', bytes);
 					let ctx = {
 						tag,
