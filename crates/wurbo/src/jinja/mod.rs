@@ -48,6 +48,15 @@ impl Templates {
     }
 }
 
+/// The [Index] is a named [Templates] [Entry] that is used to identify the entry template.
+///
+/// # Example
+///
+/// ```
+/// let index = Index::new("index".to_string(), "index.html".to_string());
+///
+/// let templates = Templates::new(index, Entry::new("output".to_string(), "output.html".to_string()), Rest::new(vec![]));
+/// ```
 pub struct Index(Entry);
 
 impl Index {
@@ -147,8 +156,10 @@ pub fn render(
         // render causes as well
         let mut err = &e as &dyn std::error::Error;
         while let Some(next_err) = err.source() {
+            println!("caused by: {:#}", next_err);
             err = next_err;
         }
+        println!("{:#}", err);
         error::RenderError::from(e)
     })?;
     Ok(rendered)
@@ -161,6 +172,11 @@ pub fn render(
 ///
 /// This macro also creates and makes available a `LAST_STATE` static variable
 /// that stores the last [PageContext] that was rendered.
+///
+/// Target templates can be set on [PageContext] to override the default templates. The default
+/// behavior is to use the entry template for the first render, and the output template for
+/// subsequent renders. If you want to specify a particular template, set the target field on
+/// [PageContext] to the name of the template you want to use.
 #[macro_export]
 macro_rules! prelude_bindgen {
     (
