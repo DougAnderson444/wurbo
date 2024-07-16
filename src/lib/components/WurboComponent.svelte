@@ -12,10 +12,17 @@
 	export let templates = null;
 
 	/**
-	 * The data that is passed to the component
+	 * The data that is passed to the wasm component. Needs to match the WIT, ie.
+	 * data = {
+	 *	  tag: 'all-content',
+	 *		val: valuesHere
+	 * }
 	 * @type {Object} - Default: null
 	 */
-	export let data = {};
+	export let data = {
+		tag: 'all-content',
+		val: null
+	};
 	/**
 	 * The wasm URL where the WIT Component can be resolved
 	 * @type {string} - Default: ''
@@ -79,22 +86,20 @@
 
 		// load the import handles into the Wasm component and get the ES module returned
 		wurbo = new Wurbo({ arrayBuffer: wasmBytes, importables, templates, inline }, eventHandler);
-
-		renderedHTML = await wurbo.render({
-			// technically `all-content` could be named anything, but convention for now is to use `all-content`
-			tag: 'all-content',
-			val: data
-		});
 	});
 
 	// Once the HTML is rendered and the module is loaded, we can activate the event emitters
+	$: if (data && wurbo)
+		wurbo.render(data).then(async (html) => {
+			console.log('data val', data);
+			renderedHTML = html;
+		});
+
+	// Activate the event listeners
 	$: if (renderedHTML && wurbo)
-		(async () => {
-			// wait for the DOM to reflect the updates first
-			await tick();
-			// once the DOM has our elements loaded, we can activate the event emitters
+		tick().then(() => {
 			wurbo.activate();
-		})();
+		});
 </script>
 
 <div>
