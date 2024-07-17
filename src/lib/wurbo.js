@@ -175,6 +175,7 @@ export class Wurbo {
 
 	async addeventlistener({ selector, ty }) {
 		document.querySelector(selector).addEventListener(ty, async (e) => {
+			// TODO: reanme this from contextName to contextTag
 			let tag = e.target.dataset.contextName || e.target.name;
 
 			// Handle file upload via input[type=file]. Check if e.target.files contains a file
@@ -202,11 +203,13 @@ export class Wurbo {
 				e.preventDefault();
 			}
 
+			// try to overwrite val only if there is a contextValue object
 			try {
 				val = Object.assign(
 					{},
 					typeof JSON.parse(e.target.dataset.contextValue) === 'object'
-						? JSON.parse(e.target.dataset.contextValue)
+						? // by combining val here, we can build variants (tag, val) using the contextValue for tag, which can also overwirte as needed
+						  Object.assign({}, { val: e.target.value }, JSON.parse(e.target.dataset.contextValue))
 						: {},
 					{ value: e.target.value }
 				);
