@@ -89,21 +89,10 @@
 	});
 
 	// Once the HTML is rendered and the module is loaded, we can activate the event emitters
-	$: if (data && wurbo)
-		wurbo.render(data).then(async (html) => {
-			console.log('data val', data);
-			renderedHTML = html;
-		});
+	$: if (data && wurbo) wurbo.render(data).then(async (html) => (renderedHTML.innerHTML = html));
 
 	// Activate the event listeners
-	$: if (renderedHTML && wurbo)
-		tick().then(() => {
-			wurbo.activate();
-		});
+	$: if (renderedHTML && wurbo) tick().then(() => wurbo.activate());
 </script>
 
-<div>
-	{#if renderedHTML}
-		{@html renderedHTML}
-	{/if}
-</div>
+<div bind:this={renderedHTML} />
