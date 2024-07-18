@@ -30,11 +30,12 @@ impl std::fmt::Debug for RenderError {
 }
 
 /// Rolls up all the errors into a single string
-fn stringify_errors(e: &dyn std::error::Error) -> String {
+fn stringify_errors(e: &minijinja::Error) -> String {
     let mut err = e as &dyn std::error::Error;
     let mut response = String::new();
     while let Some(next_err) = err.source() {
         response.push_str(&format!("\n caused by: {:#}", next_err));
+        println!("next_err: {:#?}", next_err);
         err = next_err;
     }
     response
