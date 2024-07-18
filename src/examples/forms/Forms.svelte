@@ -10,15 +10,19 @@
 	import wasmURL from '../../../target/wasm32-wasi/debug/forms.wasm?url';
 
 	// We can pass in customized templates to the component
-	let templates = [
-		['index.html', index],
-		['input.html', input],
-		['output.html', output]
-	];
+	// let templates = [
+	// 	['index.html', index],
+	// 	['input.html', input],
+	// 	['output.html', output]
+	// ];
+	let templates = null;
 
 	let data = {
-		page: { title: "Let's process the contents of a form." },
-		input: { placeholder: 'Enter a Username here' }
+		tag: 'all-content',
+		val: {
+			page: { title: "Let's process the contents of a form." },
+			input: { placeholder: 'Enter a Username here' }
+		}
 	};
 
 	const eventHandler = (payload) => {
