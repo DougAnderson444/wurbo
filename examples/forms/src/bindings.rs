@@ -140,12 +140,29 @@ pub mod demo {
                         .finish()
                 }
             }
+            /// example of a variant
+            #[derive(Clone)]
+            pub enum Example {
+                AnInput(_rt::String),
+                SomeBytes(_rt::Vec<u8>),
+            }
+            impl ::core::fmt::Debug for Example {
+                fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    match self {
+                        Example::AnInput(e) => f.debug_tuple("Example::AnInput").field(e).finish(),
+                        Example::SomeBytes(e) => {
+                            f.debug_tuple("Example::SomeBytes").field(e).finish()
+                        }
+                    }
+                }
+            }
             /// Context variants
             #[derive(Clone)]
             pub enum Context {
                 AllContent(Content),
                 Username(_rt::String),
                 Password(_rt::String),
+                ExampleVariant(Example),
                 File(FileDetails),
             }
             impl ::core::fmt::Debug for Context {
@@ -159,6 +176,9 @@ pub mod demo {
                         }
                         Context::Password(e) => {
                             f.debug_tuple("Context::Password").field(e).finish()
+                        }
+                        Context::ExampleVariant(e) => {
+                            f.debug_tuple("Context::ExampleVariant").field(e).finish()
                         }
                         Context::File(e) => f.debug_tuple("Context::File").field(e).finish(),
                     }
@@ -247,10 +267,10 @@ pub mod exports {
                     #[cfg(target_arch = "wasm32")]
                     _rt::run_ctors_once();
                     let l0 = i32::from(*arg0.add(0).cast::<u8>());
-                    use super::super::super::super::demo::forms::types::Context as V36;
-                    let v36 = match l0 {
+                    use super::super::super::super::demo::forms::types::Context as V44;
+                    let v44 = match l0 {
                         0 => {
-                            let e36 = {
+                            let e44 = {
                                 let l1 = *arg0.add(4).cast::<*mut u8>();
                                 let l2 = *arg0.add(8).cast::<usize>();
                                 let len3 = l2;
@@ -346,10 +366,10 @@ pub mod exports {
                                     },
                                 }
                             };
-                            V36::AllContent(e36)
+                            V44::AllContent(e44)
                         }
                         1 => {
-                            let e36 = {
+                            let e44 = {
                                 let l24 = *arg0.add(4).cast::<*mut u8>();
                                 let l25 = *arg0.add(8).cast::<usize>();
                                 let len26 = l25;
@@ -357,10 +377,10 @@ pub mod exports {
 
                                 _rt::string_lift(bytes26)
                             };
-                            V36::Username(e36)
+                            V44::Username(e44)
                         }
                         2 => {
-                            let e36 = {
+                            let e44 = {
                                 let l27 = *arg0.add(4).cast::<*mut u8>();
                                 let l28 = *arg0.add(8).cast::<usize>();
                                 let len29 = l28;
@@ -368,51 +388,85 @@ pub mod exports {
 
                                 _rt::string_lift(bytes29)
                             };
-                            V36::Password(e36)
+                            V44::Password(e44)
+                        }
+                        3 => {
+                            let e44 = {
+                                let l30 = i32::from(*arg0.add(4).cast::<u8>());
+                                use super::super::super::super::demo::forms::types::Example as V37;
+                                let v37 = match l30 {
+                                    0 => {
+                                        let e37 = {
+                                            let l31 = *arg0.add(8).cast::<*mut u8>();
+                                            let l32 = *arg0.add(12).cast::<usize>();
+                                            let len33 = l32;
+                                            let bytes33 =
+                                                _rt::Vec::from_raw_parts(l31.cast(), len33, len33);
+
+                                            _rt::string_lift(bytes33)
+                                        };
+                                        V37::AnInput(e37)
+                                    }
+                                    n => {
+                                        debug_assert_eq!(n, 1, "invalid enum discriminant");
+                                        let e37 = {
+                                            let l34 = *arg0.add(8).cast::<*mut u8>();
+                                            let l35 = *arg0.add(12).cast::<usize>();
+                                            let len36 = l35;
+
+                                            _rt::Vec::from_raw_parts(l34.cast(), len36, len36)
+                                        };
+                                        V37::SomeBytes(e37)
+                                    }
+                                };
+
+                                v37
+                            };
+                            V44::ExampleVariant(e44)
                         }
                         n => {
-                            debug_assert_eq!(n, 3, "invalid enum discriminant");
-                            let e36 = {
-                                let l30 = *arg0.add(4).cast::<*mut u8>();
-                                let l31 = *arg0.add(8).cast::<usize>();
-                                let len32 = l31;
-                                let l33 = *arg0.add(12).cast::<*mut u8>();
-                                let l34 = *arg0.add(16).cast::<usize>();
-                                let len35 = l34;
-                                let bytes35 = _rt::Vec::from_raw_parts(l33.cast(), len35, len35);
+                            debug_assert_eq!(n, 4, "invalid enum discriminant");
+                            let e44 = {
+                                let l38 = *arg0.add(4).cast::<*mut u8>();
+                                let l39 = *arg0.add(8).cast::<usize>();
+                                let len40 = l39;
+                                let l41 = *arg0.add(12).cast::<*mut u8>();
+                                let l42 = *arg0.add(16).cast::<usize>();
+                                let len43 = l42;
+                                let bytes43 = _rt::Vec::from_raw_parts(l41.cast(), len43, len43);
 
                                 super::super::super::super::demo::forms::wurbo_in::FileDetails {
-                                    bytes: _rt::Vec::from_raw_parts(l30.cast(), len32, len32),
-                                    filename: _rt::string_lift(bytes35),
+                                    bytes: _rt::Vec::from_raw_parts(l38.cast(), len40, len40),
+                                    filename: _rt::string_lift(bytes43),
                                 }
                             };
-                            V36::File(e36)
+                            V44::File(e44)
                         }
                     };
-                    let result37 = T::render(v36);
+                    let result45 = T::render(v44);
                     _rt::cabi_dealloc(arg0, 72, 4);
-                    let ptr38 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
-                    match result37 {
+                    let ptr46 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
+                    match result45 {
                         Ok(e) => {
-                            *ptr38.add(0).cast::<u8>() = (0i32) as u8;
-                            let vec39 = (e.into_bytes()).into_boxed_slice();
-                            let ptr39 = vec39.as_ptr().cast::<u8>();
-                            let len39 = vec39.len();
-                            ::core::mem::forget(vec39);
-                            *ptr38.add(8).cast::<usize>() = len39;
-                            *ptr38.add(4).cast::<*mut u8>() = ptr39.cast_mut();
+                            *ptr46.add(0).cast::<u8>() = (0i32) as u8;
+                            let vec47 = (e.into_bytes()).into_boxed_slice();
+                            let ptr47 = vec47.as_ptr().cast::<u8>();
+                            let len47 = vec47.len();
+                            ::core::mem::forget(vec47);
+                            *ptr46.add(8).cast::<usize>() = len47;
+                            *ptr46.add(4).cast::<*mut u8>() = ptr47.cast_mut();
                         }
                         Err(e) => {
-                            *ptr38.add(0).cast::<u8>() = (1i32) as u8;
-                            let vec40 = (e.into_bytes()).into_boxed_slice();
-                            let ptr40 = vec40.as_ptr().cast::<u8>();
-                            let len40 = vec40.len();
-                            ::core::mem::forget(vec40);
-                            *ptr38.add(8).cast::<usize>() = len40;
-                            *ptr38.add(4).cast::<*mut u8>() = ptr40.cast_mut();
+                            *ptr46.add(0).cast::<u8>() = (1i32) as u8;
+                            let vec48 = (e.into_bytes()).into_boxed_slice();
+                            let ptr48 = vec48.as_ptr().cast::<u8>();
+                            let len48 = vec48.len();
+                            ::core::mem::forget(vec48);
+                            *ptr46.add(8).cast::<usize>() = len48;
+                            *ptr46.add(4).cast::<*mut u8>() = ptr48.cast_mut();
                         }
                     };
-                    ptr38
+                    ptr46
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
@@ -469,6 +523,15 @@ pub mod exports {
                         _ => _rt::invalid_enum_discriminant(),
                     });
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_deactivate_cabi<T: Guest>(arg0: *mut u8, arg1: usize) {
+                    #[cfg(target_arch = "wasm32")]
+                    _rt::run_ctors_once();
+                    let len0 = arg1;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    T::deactivate(_rt::string_lift(bytes0));
+                }
                 pub trait Guest {
                     /// Optionally customize the configuration of the templates used to render the component
                     fn customize(
@@ -479,34 +542,40 @@ pub mod exports {
                     fn render(ctx: Context) -> Result<_rt::String, _rt::String>;
                     /// activate listening
                     fn activate(selectors: Option<_rt::Vec<_rt::String>>);
+                    /// Removes a listener from the list of selectors
+                    fn deactivate(selector: _rt::String);
                 }
                 #[doc(hidden)]
 
                 macro_rules! __export_demo_forms_wurbo_out_cabi{
-    ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
+  ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
 
-      #[export_name = "demo:forms/wurbo-out#customize"]
-      unsafe extern "C" fn export_customize(arg0: *mut u8,arg1: usize,) -> *mut u8 {
-        $($path_to_types)*::_export_customize_cabi::<$ty>(arg0, arg1)
-      }
-      #[export_name = "cabi_post_demo:forms/wurbo-out#customize"]
-      unsafe extern "C" fn _post_return_customize(arg0: *mut u8,) {
-        $($path_to_types)*::__post_return_customize::<$ty>(arg0)
-      }
-      #[export_name = "demo:forms/wurbo-out#render"]
-      unsafe extern "C" fn export_render(arg0: *mut u8,) -> *mut u8 {
-        $($path_to_types)*::_export_render_cabi::<$ty>(arg0)
-      }
-      #[export_name = "cabi_post_demo:forms/wurbo-out#render"]
-      unsafe extern "C" fn _post_return_render(arg0: *mut u8,) {
-        $($path_to_types)*::__post_return_render::<$ty>(arg0)
-      }
-      #[export_name = "demo:forms/wurbo-out#activate"]
-      unsafe extern "C" fn export_activate(arg0: i32,arg1: *mut u8,arg2: usize,) {
-        $($path_to_types)*::_export_activate_cabi::<$ty>(arg0, arg1, arg2)
-      }
-    };);
-  }
+    #[export_name = "demo:forms/wurbo-out#customize"]
+    unsafe extern "C" fn export_customize(arg0: *mut u8,arg1: usize,) -> *mut u8 {
+      $($path_to_types)*::_export_customize_cabi::<$ty>(arg0, arg1)
+    }
+    #[export_name = "cabi_post_demo:forms/wurbo-out#customize"]
+    unsafe extern "C" fn _post_return_customize(arg0: *mut u8,) {
+      $($path_to_types)*::__post_return_customize::<$ty>(arg0)
+    }
+    #[export_name = "demo:forms/wurbo-out#render"]
+    unsafe extern "C" fn export_render(arg0: *mut u8,) -> *mut u8 {
+      $($path_to_types)*::_export_render_cabi::<$ty>(arg0)
+    }
+    #[export_name = "cabi_post_demo:forms/wurbo-out#render"]
+    unsafe extern "C" fn _post_return_render(arg0: *mut u8,) {
+      $($path_to_types)*::__post_return_render::<$ty>(arg0)
+    }
+    #[export_name = "demo:forms/wurbo-out#activate"]
+    unsafe extern "C" fn export_activate(arg0: i32,arg1: *mut u8,arg2: usize,) {
+      $($path_to_types)*::_export_activate_cabi::<$ty>(arg0, arg1, arg2)
+    }
+    #[export_name = "demo:forms/wurbo-out#deactivate"]
+    unsafe extern "C" fn export_deactivate(arg0: *mut u8,arg1: usize,) {
+      $($path_to_types)*::_export_deactivate_cabi::<$ty>(arg0, arg1)
+    }
+  };);
+}
                 #[doc(hidden)]
                 pub(crate) use __export_demo_forms_wurbo_out_cabi;
                 #[repr(align(4))]
@@ -580,25 +649,27 @@ pub(crate) use __export_main_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.25.0:main:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 759] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xfc\x04\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 853] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xda\x05\x01A\x02\x01\
 A\x09\x01B\x07\x01r\x02\x08selectors\x02tys\x04\0\x0elisten-details\x03\0\0\x01p\
 }\x01r\x02\x05bytes\x02\x08filenames\x04\0\x0cfile-details\x03\0\x03\x01@\x01\x07\
 details\x01\x01\0\x04\0\x10addeventlistener\x01\x05\x03\x01\x13demo:forms/wurbo-\
-in\x05\0\x02\x03\0\0\x0elisten-details\x02\x03\0\0\x0cfile-details\x01B\x10\x02\x03\
+in\x05\0\x02\x03\0\0\x0elisten-details\x02\x03\0\0\x0cfile-details\x01B\x13\x02\x03\
 \x02\x01\x01\x04\0\x0elisten-details\x03\0\0\x02\x03\x02\x01\x02\x04\0\x0cfile-d\
 etails\x03\0\x02\x01r\x01\x05titles\x04\0\x04page\x03\0\x04\x01r\x01\x0bplacehol\
 ders\x04\0\x05input\x03\0\x06\x01ks\x01r\x04\x05value\x08\x02id\x08\x08username\x08\
 \x08password\x08\x04\0\x06output\x03\0\x09\x01k\x0a\x01r\x03\x04page\x05\x05inpu\
-t\x07\x06output\x0b\x04\0\x07content\x03\0\x0c\x01q\x04\x0ball-content\x01\x0d\0\
-\x08username\x01s\0\x08password\x01s\0\x04file\x01\x03\0\x04\0\x07context\x03\0\x0e\
-\x03\x01\x10demo:forms/types\x05\x03\x02\x03\0\x01\x07context\x01B\x0e\x02\x03\x02\
-\x01\x04\x04\0\x07context\x03\0\0\x01o\x02ss\x01p\x02\x01j\0\x01s\x01@\x01\x09te\
-mplates\x03\0\x04\x04\0\x09customize\x01\x05\x01j\x01s\x01s\x01@\x01\x03ctx\x01\0\
-\x06\x04\0\x06render\x01\x07\x01ps\x01k\x08\x01@\x01\x09selectors\x09\x01\0\x04\0\
-\x08activate\x01\x0a\x04\x01\x14demo:forms/wurbo-out\x05\x05\x04\x01\x0fdemo:for\
-ms/main\x04\0\x0b\x0a\x01\0\x04main\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\
-\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
+t\x07\x06output\x0b\x04\0\x07content\x03\0\x0c\x01p}\x01q\x02\x08an-input\x01s\0\
+\x0asome-bytes\x01\x0e\0\x04\0\x07example\x03\0\x0f\x01q\x05\x0ball-content\x01\x0d\
+\0\x08username\x01s\0\x08password\x01s\0\x0fexample-variant\x01\x10\0\x04file\x01\
+\x03\0\x04\0\x07context\x03\0\x11\x03\x01\x10demo:forms/types\x05\x03\x02\x03\0\x01\
+\x07context\x01B\x10\x02\x03\x02\x01\x04\x04\0\x07context\x03\0\0\x01o\x02ss\x01\
+p\x02\x01j\0\x01s\x01@\x01\x09templates\x03\0\x04\x04\0\x09customize\x01\x05\x01\
+j\x01s\x01s\x01@\x01\x03ctx\x01\0\x06\x04\0\x06render\x01\x07\x01ps\x01k\x08\x01\
+@\x01\x09selectors\x09\x01\0\x04\0\x08activate\x01\x0a\x01@\x01\x08selectors\x01\
+\0\x04\0\x0adeactivate\x01\x0b\x04\x01\x14demo:forms/wurbo-out\x05\x05\x04\x01\x0f\
+demo:forms/main\x04\0\x0b\x0a\x01\0\x04main\x03\0\0\0G\x09producers\x01\x0cproce\
+ssed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
 
 #[inline(never)]
 #[doc(hidden)]

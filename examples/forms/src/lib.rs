@@ -78,6 +78,13 @@ impl From<&types::Context> for PageContext {
             types::Context::Username(u) => PageContext::from(output::Username::from(u.to_owned())),
             types::Context::Password(p) => PageContext::from(output::Password::from(p.to_owned())),
             types::Context::File(f) => PageContext::from(output::File::from(f.to_owned())),
+            types::Context::ExampleVariant(v) => {
+                println!("Received ExampleVariant: {:?}", v);
+                // We don't have a variant for this example, so we will just return the default
+                // derive from LAST_STATE
+                let state = { LAST_STATE.lock().unwrap().clone().unwrap() };
+                state
+            }
         }
     }
 }

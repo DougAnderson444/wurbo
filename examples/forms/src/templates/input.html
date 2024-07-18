@@ -29,5 +29,31 @@
 				/>
 			</div>
 		</div>
+		<!-- Example variant -->
+		<div class="flex-1">
+			<div class="flex-1">Example String Variant (enum)</div>
+			<div class="flex-1">
+				<input
+					id="{{ input.id|on('keyup') }}"
+					data-context-name="example-variant"
+					data-context-value='{ "tag": "an-input" }'
+					class="rounded border border-blue-400 bg-green-100 text-neutral-700 p-2 m-2 placeholder:Enter"
+					type="email"
+				/>
+			</div>
+		</div>
+		<!-- Example Uint8Array variant -->
+		<div class="flex-1">
+			<div class="flex-1">Example Uint8Array Variant</div>
+			<div class="flex-1">
+				<input
+					id="{{ input.id|on('keyup') }}"
+					data-context-name="example-variant"
+					data-context-value='{ "tag": "some-bytes" }'
+					class="rounded border border-blue-400 bg-green-100 text-neutral-700 p-2 m-2 placeholder:Enter"
+					type="email"
+				/>
+			</div>
+		</div>
 	</div>
 </div>

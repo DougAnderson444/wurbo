@@ -31,11 +31,18 @@ interface types {
     output: option<output>,
   }
 
+  /// example of a variant
+  variant example {
+    an-input(string),
+    some-bytes(list<u8>)
+  }
+
   // Context variants
   variant context {
     all-content(content),
     username(string),
     password(string),
+    example-variant(example),
     file(file-details)
   }
 
@@ -76,6 +83,9 @@ interface wurbo-out {
 
   // activate listening 
   activate: func(selectors: option<list<string>>);
+
+  /// Removes a listener from the list of selectors
+  deactivate: func(selector: string);
 }
 
 /// An example world for the component to target.
