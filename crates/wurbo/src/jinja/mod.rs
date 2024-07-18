@@ -279,6 +279,7 @@ macro_rules! prelude_bindgen {
                 Ok(wurbo::jinja::render(&target, ctx)?)
             }
 
+            /// Activates the listeners in the LISTENERS_MAP
             fn activate(selectors: Option<Vec<String>>) {
                 let listeners = LISTENERS_MAP.lock().unwrap();
                 for (selector, ty) in listeners.iter() {
@@ -295,6 +296,12 @@ macro_rules! prelude_bindgen {
 
                     wurbo_in::addeventlistener(&deets);
                 }
+            }
+
+            /// Removes a selector string from the LISTENERS_MAP
+            fn deactivate(selector: String) {
+                let mut listeners = LISTENERS_MAP.lock().unwrap();
+                listeners.remove(&selector);
             }
         }
     };
