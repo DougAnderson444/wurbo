@@ -60,6 +60,7 @@ pub struct PageContext {
 impl Object for PageContext {
     fn get_value(self: &std::sync::Arc<Self>, key: &Value) -> Option<Value> {
         match key.as_str()? {
+            "id" => Some(Value::from(rand_id())),
             "page" => Some(Value::from_object(self.page.clone())),
             "input" => Some(Value::from_object(self.input.clone())),
             "output" => Some(Value::from_object(self.output.clone())),

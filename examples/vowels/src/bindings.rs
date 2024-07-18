@@ -386,6 +386,15 @@ pub mod exports {
                         _ => _rt::invalid_enum_discriminant(),
                     });
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_deactivate_cabi<T: Guest>(arg0: *mut u8, arg1: usize) {
+                    #[cfg(target_arch = "wasm32")]
+                    _rt::run_ctors_once();
+                    let len0 = arg1;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    T::deactivate(_rt::string_lift(bytes0));
+                }
                 pub trait Guest {
                     /// Optionally customize the configuration of the templates used to render the component
                     fn customize(
@@ -395,34 +404,40 @@ pub mod exports {
                     fn render(ctx: Context) -> Result<_rt::String, _rt::String>;
                     /// activate listening
                     fn activate(selectors: Option<_rt::Vec<_rt::String>>);
+                    /// Removes a listener from the list of selectors
+                    fn deactivate(selector: _rt::String);
                 }
                 #[doc(hidden)]
 
                 macro_rules! __export_demo_vowels_wurbo_out_cabi{
-    ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
+  ($ty:ident with_types_in $($path_to_types:tt)*) => (const _: () = {
 
-      #[export_name = "demo:vowels/wurbo-out#customize"]
-      unsafe extern "C" fn export_customize(arg0: *mut u8,arg1: usize,) -> *mut u8 {
-        $($path_to_types)*::_export_customize_cabi::<$ty>(arg0, arg1)
-      }
-      #[export_name = "cabi_post_demo:vowels/wurbo-out#customize"]
-      unsafe extern "C" fn _post_return_customize(arg0: *mut u8,) {
-        $($path_to_types)*::__post_return_customize::<$ty>(arg0)
-      }
-      #[export_name = "demo:vowels/wurbo-out#render"]
-      unsafe extern "C" fn export_render(arg0: i32,arg1: *mut u8,arg2: usize,arg3: *mut u8,arg4: usize,arg5: i32,arg6: *mut u8,arg7: usize,arg8: i32,arg9: *mut u8,arg10: usize,arg11: i32,arg12: *mut u8,arg13: usize,) -> *mut u8 {
-        $($path_to_types)*::_export_render_cabi::<$ty>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
-      }
-      #[export_name = "cabi_post_demo:vowels/wurbo-out#render"]
-      unsafe extern "C" fn _post_return_render(arg0: *mut u8,) {
-        $($path_to_types)*::__post_return_render::<$ty>(arg0)
-      }
-      #[export_name = "demo:vowels/wurbo-out#activate"]
-      unsafe extern "C" fn export_activate(arg0: i32,arg1: *mut u8,arg2: usize,) {
-        $($path_to_types)*::_export_activate_cabi::<$ty>(arg0, arg1, arg2)
-      }
-    };);
-  }
+    #[export_name = "demo:vowels/wurbo-out#customize"]
+    unsafe extern "C" fn export_customize(arg0: *mut u8,arg1: usize,) -> *mut u8 {
+      $($path_to_types)*::_export_customize_cabi::<$ty>(arg0, arg1)
+    }
+    #[export_name = "cabi_post_demo:vowels/wurbo-out#customize"]
+    unsafe extern "C" fn _post_return_customize(arg0: *mut u8,) {
+      $($path_to_types)*::__post_return_customize::<$ty>(arg0)
+    }
+    #[export_name = "demo:vowels/wurbo-out#render"]
+    unsafe extern "C" fn export_render(arg0: i32,arg1: *mut u8,arg2: usize,arg3: *mut u8,arg4: usize,arg5: i32,arg6: *mut u8,arg7: usize,arg8: i32,arg9: *mut u8,arg10: usize,arg11: i32,arg12: *mut u8,arg13: usize,) -> *mut u8 {
+      $($path_to_types)*::_export_render_cabi::<$ty>(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13)
+    }
+    #[export_name = "cabi_post_demo:vowels/wurbo-out#render"]
+    unsafe extern "C" fn _post_return_render(arg0: *mut u8,) {
+      $($path_to_types)*::__post_return_render::<$ty>(arg0)
+    }
+    #[export_name = "demo:vowels/wurbo-out#activate"]
+    unsafe extern "C" fn export_activate(arg0: i32,arg1: *mut u8,arg2: usize,) {
+      $($path_to_types)*::_export_activate_cabi::<$ty>(arg0, arg1, arg2)
+    }
+    #[export_name = "demo:vowels/wurbo-out#deactivate"]
+    unsafe extern "C" fn export_deactivate(arg0: *mut u8,arg1: usize,) {
+      $($path_to_types)*::_export_deactivate_cabi::<$ty>(arg0, arg1)
+    }
+  };);
+}
                 #[doc(hidden)]
                 pub(crate) use __export_demo_vowels_wurbo_out_cabi;
                 #[repr(align(4))]
@@ -496,8 +511,8 @@ pub(crate) use __export_main_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.25.0:main:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 650] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x8f\x04\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 680] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xad\x04\x01A\x02\x01\
 A\x08\x01B\x0e\x01r\x02\x08selectors\x02tys\x04\0\x0elisten-details\x03\0\0\x01r\
 \x01\x05titles\x04\0\x04page\x03\0\x02\x01r\x01\x0bplaceholders\x04\0\x05input\x03\
 \0\x04\x01ks\x01r\x03\x05values\x02id\x06\x08template\x06\x04\0\x06output\x03\0\x07\
@@ -506,13 +521,13 @@ A\x08\x01B\x0e\x01r\x02\x08selectors\x02tys\x04\0\x0elisten-details\x03\0\0\x01r
 \x03\x01\x11demo:vowels/types\x05\0\x02\x03\0\0\x0elisten-details\x01B\x04\x02\x03\
 \x02\x01\x01\x04\0\x0elisten-details\x03\0\0\x01@\x01\x07details\x01\x01\0\x04\0\
 \x10addeventlistener\x01\x02\x03\x01\x14demo:vowels/wurbo-in\x05\x02\x02\x03\0\0\
-\x07context\x01B\x0e\x02\x03\x02\x01\x03\x04\0\x07context\x03\0\0\x01o\x02ss\x01\
+\x07context\x01B\x10\x02\x03\x02\x01\x03\x04\0\x07context\x03\0\0\x01o\x02ss\x01\
 p\x02\x01j\0\x01s\x01@\x01\x09templates\x03\0\x04\x04\0\x09customize\x01\x05\x01\
 j\x01s\x01s\x01@\x01\x03ctx\x01\0\x06\x04\0\x06render\x01\x07\x01ps\x01k\x08\x01\
-@\x01\x09selectors\x09\x01\0\x04\0\x08activate\x01\x0a\x04\x01\x15demo:vowels/wu\
-rbo-out\x05\x04\x04\x01\x10demo:vowels/main\x04\0\x0b\x0a\x01\0\x04main\x03\0\0\0\
-G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.208.1\x10wit-bindge\
-n-rust\x060.25.0";
+@\x01\x09selectors\x09\x01\0\x04\0\x08activate\x01\x0a\x01@\x01\x08selectors\x01\
+\0\x04\0\x0adeactivate\x01\x0b\x04\x01\x15demo:vowels/wurbo-out\x05\x04\x04\x01\x10\
+demo:vowels/main\x04\0\x0b\x0a\x01\0\x04main\x03\0\0\0G\x09producers\x01\x0cproc\
+essed-by\x02\x0dwit-component\x070.208.1\x10wit-bindgen-rust\x060.25.0";
 
 #[inline(never)]
 #[doc(hidden)]
