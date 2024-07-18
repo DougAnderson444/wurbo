@@ -77,6 +77,26 @@ addEventListener('message', async (e) => {
 				break;
 			}
 			break;
+		// deactivates(selector)
+		// This function is called when the HTML is updated and we need to deactivate the event listener
+		case 'deactivate':
+			let l = 0;
+			while (!(mod && mod?.wurboOut && mod?.wurboOut?.deactivate)) {
+				if (l > 10) {
+					console.warn('Condition not met');
+					break;
+				}
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				l++;
+			}
+
+			try {
+				mod.wurboOut.deactivate(payload);
+			} catch (e) {
+				console.warn('No deactivate function for module.');
+				break;
+			}
+			break;
 		default:
 			break;
 	}

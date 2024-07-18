@@ -91,6 +91,15 @@ export class Wurbo {
 		return await this.post('activate', selectors);
 	}
 
+	/*
+	 * Deactivates the given css selector
+	 * @param {String} selector - single css selector string to deactivate, e.g. '#my-id'
+	 * @return {Promise} - void
+	 */
+	async deactivate(selector = null) {
+		return await this.post('deactivate', selectors);
+	}
+
 	// aggregation.activates (plural) CSS selectors
 	async aggregation(selectors = null) {
 		return await this.post('aggregation', selectors);
@@ -174,7 +183,8 @@ export class Wurbo {
 	}
 
 	async addeventlistener({ selector, ty }) {
-		document.querySelector(selector).addEventListener(ty, async (e) => {
+		// Defined the handler function separately so it can also be removed as necessary
+		const eventHandler = async (e) => {
 			// TODO: reanme this from contextName to contextTag
 			let tag = e.target.dataset.contextName || e.target.name;
 
@@ -228,7 +238,25 @@ export class Wurbo {
 
 			let rendered = await this.post('render', ctx);
 			this.dom(rendered);
-		});
+		};
+
+		let el;
+
+		try {
+			el = document.querySelector(selector);
+		} catch (error) {
+			// sometime elements get removed and we no longer need the or listen to them
+			// TODO: remove these from wurbo LISTENER_MAP somehow?
+			// call deactivate(selector) to remove the event listener from the selector)
+			console.warn('Removing event listener from selector', selector);
+			// remove the selector from our tracking list in wasm using the deactivate method
+			this.deactivate(selector);
+			// Since we are using Svelte in WurboComponent, when the DOM is updated, Svelte should handle
+			// removing the event listener from the selector for us
+			return;
+		}
+
+		el.addEventListener(ty, eventHandler);
 	}
 }
 
