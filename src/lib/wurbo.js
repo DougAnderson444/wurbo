@@ -96,8 +96,8 @@ export class Wurbo {
 	 * @param {String} selector - single css selector string to deactivate, e.g. '#my-id'
 	 * @return {Promise} - void
 	 */
-	async deactivate(selector = null) {
-		return await this.post('deactivate', selectors);
+	async deactivate(selector) {
+		return await this.post('deactivate', selector);
 	}
 
 	// aggregation.activates (plural) CSS selectors
