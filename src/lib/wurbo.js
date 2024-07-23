@@ -240,10 +240,8 @@ export class Wurbo {
 			this.dom(rendered);
 		};
 
-		let el;
-
 		try {
-			el = document.querySelector(selector);
+			document.querySelector(selector).addEventListener(ty, eventHandler);
 		} catch (error) {
 			// sometime elements get removed and we no longer need the or listen to them
 			// TODO: remove these from wurbo LISTENER_MAP somehow?
@@ -255,8 +253,6 @@ export class Wurbo {
 			// removing the event listener from the selector for us
 			return;
 		}
-
-		el.addEventListener(ty, eventHandler);
 	}
 }
 
