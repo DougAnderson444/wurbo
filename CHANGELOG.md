@@ -1,3 +1,7 @@
+# 0.5.3
+
+- bugfix: [wurbo-js] event handlers now overwrite any old events handlers to avoid duplicates 
+
 # 0.5.0
 
 - Breaking change: WurboOut now needs deactivate in the WIT interface.
