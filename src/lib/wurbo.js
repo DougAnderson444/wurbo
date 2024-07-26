@@ -184,7 +184,7 @@ export class Wurbo {
 
 	async addeventlistener({ selector, ty }) {
 		// Defined the handler function separately so it can also be removed as necessary
-		const eventHandler = async (e) => {
+		const handler = async (e) => {
 			// TODO: reanme this from contextName to contextTag
 			let tag = e.target.dataset.contextName || e.target.name;
 
@@ -241,12 +241,34 @@ export class Wurbo {
 		};
 
 		try {
-			document.querySelector(selector).addEventListener(ty, eventHandler);
+			const eventTypes = [
+				'click',
+				'input',
+				'change',
+				'submit',
+				'keydown',
+				'keyup',
+				'keypress',
+				'focus',
+				'blur',
+				'mouseover',
+				'mouseout',
+				'mouseenter',
+				'mouseleave',
+				'touchstart',
+				'touchend',
+				'touchmove'
+			];
+
+			if (eventTypes.includes(ty)) {
+				document.querySelector(selector)[`on${ty}`] = handler;
+			} else {
+				// all other events are added
+				document.querySelector(selector).addEventListener(ty, handler);
+			}
 		} catch (error) {
 			// sometime elements get removed and we no longer need the or listen to them
-			// TODO: remove these from wurbo LISTENER_MAP somehow?
-			// call deactivate(selector) to remove the event listener from the selector)
-			console.warn('Removing event listener from selector', selector);
+			// console.warn('Removing event listener from selector', selector);
 			// remove the selector from our tracking list in wasm using the deactivate method
 			this.deactivate(selector);
 			// Since we are using Svelte in WurboComponent, when the DOM is updated, Svelte should handle
